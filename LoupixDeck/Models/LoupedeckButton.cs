@@ -1,27 +1,14 @@
-using System.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace LoupixDeck.Models;
 
-public class LoupedeckButton : INotifyPropertyChanged
+[ObservableObject]
+public partial class LoupedeckButton
 {
-    private string _command;
-    public string Command
-    {
-        get => _command;
-        set
-        {
-            if (_command == value) return;
-            _command = value;
-            OnPropertyChanged(nameof(Command));
-        }
-    }
+    [ObservableProperty]
+    public partial string Command { get; set; }
 
-    public bool IgnoreRefresh {
-        get;
-        set;
-    }
-
-    private bool _enableWhenOff;
+    public bool IgnoreRefresh { get; set; }
 
     /// <summary>
     /// When true, this button's command still runs while the device is in the
@@ -29,28 +16,13 @@ public class LoupedeckButton : INotifyPropertyChanged
     /// for a "wake the device" button that needs to function while everything
     /// else is muted.
     /// </summary>
-    public virtual bool EnableWhenOff
-    {
-        get => _enableWhenOff;
-        set
-        {
-            if (_enableWhenOff == value) return;
-            _enableWhenOff = value;
-            OnPropertyChanged(nameof(EnableWhenOff));
-        }
-    }
+    public virtual bool EnableWhenOff { get; set => SetProperty(ref field, value); }
 
     public event EventHandler ItemChanged;
-    public event PropertyChangedEventHandler PropertyChanged;
 
     public void Refresh()
     {
         if (IgnoreRefresh) return;
         ItemChanged?.Invoke(this, EventArgs.Empty);
-    }
-    
-    protected void OnPropertyChanged(string propertyName)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

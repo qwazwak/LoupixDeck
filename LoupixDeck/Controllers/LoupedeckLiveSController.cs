@@ -308,8 +308,7 @@ public partial class LoupedeckLiveSController(
 
         // Rotary selection is already set by InitializeRotaryPages (per side on
         // side-strip devices, where CurrentRotaryButtonPage/Both is intentionally null).
-        if (config.CurrentRotaryButtonPage != null)
-            config.CurrentRotaryButtonPage.Selected = true;
+        config.CurrentRotaryButtonPage?.Selected = true;
         config.CurrentTouchButtonPage.Selected = true;
 
         config.PropertyChanged += ConfigOnPropertyChanged;
@@ -506,8 +505,7 @@ public partial class LoupedeckLiveSController(
         // (deferred dispose), so don't dispose it here — it's also read by the device
         // push below and held by the UI binding.
         var slotButton = config.CurrentTouchButtonPage?.TouchButtons?.FindByIndex(slotIndex);
-        if (slotButton != null)
-            slotButton.RenderedImage = strip;
+        slotButton?.RenderedImage = strip;
 
         await razer.DrawTouchSlot(slotIndex, strip);
     }
@@ -727,7 +725,9 @@ public partial class LoupedeckLiveSController(
         if (ReferenceEquals(_segmentPage[idx], page)
             && ReferenceEquals(_segmentProvider[idx], desired)
             && _segmentBindingSig[idx] == sig)
+        {
             return;
+        }
 
         DetachSegmentAt(idx);
         _segmentPage[idx] = page;

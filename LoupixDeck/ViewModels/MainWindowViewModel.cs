@@ -1,4 +1,5 @@
 ﻿using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LoupixDeck.Controllers;
 using LoupixDeck.Models;
@@ -13,7 +14,7 @@ using RelayCommand = LoupixDeck.Utils.RelayCommand;
 
 namespace LoupixDeck.ViewModels;
 
-public class MainWindowViewModel : ViewModelBase
+public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly IDialogService _dialogService;
 
@@ -52,7 +53,6 @@ public class MainWindowViewModel : ViewModelBase
     public ICommand SettingsMenuCommand { get; }
     public ICommand MacroEditorMenuCommand { get; }
     public ICommand AboutMenuCommand { get; }
-    public ICommand QuitApplicationCommand { get; }
     public ICommand ToggleDeviceStateCommand { get; }
 
     public LoupedeckLiveSController LoupedeckController { get; }
@@ -81,28 +81,19 @@ public class MainWindowViewModel : ViewModelBase
     private readonly IDynamicTextManager _dynamicTextManager;
     private readonly IExclusiveModeService _exclusiveMode;
 
-    private bool _isExclusiveModeActive;
-
     /// <summary>
     /// True while a plugin/provider has taken the device over via exclusive mode.
     /// The GUI still shows the configured touch buttons (they aren't what the
     /// device is rendering), so the layouts overlay them with a notice while this
     /// is set. Updated from <see cref="IExclusiveModeService.StateChanged"/>.
     /// </summary>
-    public bool IsExclusiveModeActive
-    {
-        get => _isExclusiveModeActive;
-        private set => SetProperty(ref _isExclusiveModeActive, value);
-    }
+    [ObservableProperty]
+    public partial bool IsExclusiveModeActive { get; private set; }
 
-    private string _exclusiveModeTitle;
 
     /// <summary>Title of the active exclusive-mode provider, shown in the overlay.</summary>
-    public string ExclusiveModeTitle
-    {
-        get => _exclusiveModeTitle;
-        private set => SetProperty(ref _exclusiveModeTitle, value);
-    }
+    [ObservableProperty]
+    public partial string ExclusiveModeTitle { get; private set; }
 
     public MainWindowViewModel(LoupedeckLiveSController loupedeck,
         IDialogService dialogService,
@@ -182,7 +173,6 @@ public class MainWindowViewModel : ViewModelBase
         SettingsMenuCommand = new AsyncRelayCommand(SettingsMenuButton_Click);
         MacroEditorMenuCommand = new AsyncRelayCommand(MacroEditorMenuButton_Click);
         AboutMenuCommand = new AsyncRelayCommand(AboutMenuButton_Click);
-        QuitApplicationCommand = new RelayCommand(QuitApplication);
         ToggleDeviceStateCommand = new AsyncRelayCommand(LoupedeckController.ToggleDeviceState);
 
         // Follow Light/Dark for the rendered device chrome (knob + LED/RGB buttons),
@@ -417,6 +407,7 @@ public class MainWindowViewModel : ViewModelBase
         LoupedeckController.SaveConfig();
     }
 
+    [RelayCommand]
     private void QuitApplication()
     {
         var window = Utils.WindowHelper.GetMainWindow();

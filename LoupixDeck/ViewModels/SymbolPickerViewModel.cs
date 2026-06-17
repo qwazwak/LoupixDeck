@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
-using System.Windows.Input;
 using Avalonia.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using LoupixDeck.Models;
 using LoupixDeck.Utils;
 using LoupixDeck.ViewModels.Base;
@@ -28,7 +29,7 @@ public class SymbolPickerRequest
 /// Dialog view model for choosing a symbol from <see cref="SymbolLibrary"/>.
 /// Supports text search and category filtering over the curated icon set.
 /// </summary>
-public class SymbolPickerViewModel : DialogViewModelBase<SymbolPickerRequest, DialogResult>
+public partial class SymbolPickerViewModel : DialogViewModelBase<SymbolPickerRequest, DialogResult>
 {
     private const string AllCategories = "All";
 
@@ -42,51 +43,37 @@ public class SymbolPickerViewModel : DialogViewModelBase<SymbolPickerRequest, Di
     /// <summary>FontFamily used by the View to render the MDI glyphs.</summary>
     public FontFamily SymbolFont { get; } = new(SymbolLibrary.FontUri);
 
-    private string _searchText = string.Empty;
     public string SearchText
     {
-        get => _searchText;
+        get;
         set
         {
-            if (SetProperty(ref _searchText, value))
+            if (SetProperty(ref field, value))
                 ApplyFilter();
         }
-    }
+    } = string.Empty;
 
-    private string _selectedCategory = AllCategories;
     public string SelectedCategory
     {
-        get => _selectedCategory;
+        get;
         set
         {
-            if (SetProperty(ref _selectedCategory, value))
+            if (SetProperty(ref field, value))
                 ApplyFilter();
         }
-    }
+    } = AllCategories;
 
-    private SymbolDefinition _selectedSymbol;
-    public SymbolDefinition SelectedSymbol
-    {
-        get => _selectedSymbol;
-        set
-        {
-            if (SetProperty(ref _selectedSymbol, value))
-                ((RelayCommand)ConfirmCommand).NotifyCanExecuteChanged();
-        }
-    }
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ConfirmCommand))]
+    public partial SymbolDefinition SelectedSymbol { get; set; }
 
-    public ICommand ConfirmCommand { get; }
-    public ICommand CancelCommand { get; }
+    public IRelayCommand ConfirmCommand => ConfirmSelectionCommand;
+    public IRelayCommand CancelCommand => CancelSelectionCommand;
 
     /// <summary>Raised when the dialog should close (after Confirm or Cancel).</summary>
     public event Action CloseRequested;
 
-    public SymbolPickerViewModel()
-    {
-        ConfirmCommand = new RelayCommand(ConfirmSelection, () => SelectedSymbol != null);
-        CancelCommand = new RelayCommand(CancelSelection);
-        ApplyFilter();
-    }
+    public SymbolPickerViewModel() => ApplyFilter();
 
     public override void Initialize(SymbolPickerRequest parameter)
     {
@@ -102,31 +89,40 @@ public class SymbolPickerViewModel : DialogViewModelBase<SymbolPickerRequest, Di
 
     private void ApplyFilter()
     {
-        var search = _searchText?.Trim() ?? string.Empty;
+        var search = SearchText?.Trim() ?? string.Empty;
 
-        var filtered = SymbolLibrary.All.Where(s =>
-            (_selectedCategory == AllCategories || s.Category == _selectedCategory) &&
-            (search.Length == 0 ||
-             s.DisplayName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-             s.Id.Contains(search, StringComparison.OrdinalIgnoreCase)));
+        IEnumerable<SymbolDefinition> filtered = SymbolLibrary.All;
+        if (SelectedCategory != AllCategories)
+            filtered = filtered.Where(s => s.Category == SelectedCategory);
+        
+        if (search.Length is not 0)
+        {
+            filtered = filtered.Where(s =>
+                s.DisplayName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                s.Id.Contains(search, StringComparison.OrdinalIgnoreCase));
+        }
 
         Symbols.Clear();
         foreach (var symbol in filtered)
             Symbols.Add(symbol);
 
-        if (_selectedSymbol != null && !Symbols.Contains(_selectedSymbol))
+        if (SelectedSymbol != null && !Symbols.Contains(SelectedSymbol))
             SelectedSymbol = null;
     }
 
+    private bool CanConfirmSelection() => SelectedSymbol != null;
+
+    [RelayCommand(CanExecute = nameof(CanConfirmSelection))]
     public void ConfirmSelection()
     {
-        if (SelectedSymbol == null) return;
+        if (!CanConfirmSelection()) return;
 
         _request.SelectedSymbol = SelectedSymbol;
         Confirm(new DialogResult(true));
         CloseRequested?.Invoke();
     }
 
+    [RelayCommand]
     private void CancelSelection()
     {
         Cancel();

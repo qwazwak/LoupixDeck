@@ -60,8 +60,9 @@ public class UpdateButtonCommand(IDeviceController controller, IAssetService ass
         var assignments = new List<(string Key, string Value)>(parameters.Length - 1);
         for (var i = 1; i < parameters.Length; i++)
         {
-            var (key, value) = SplitKeyValue(parameters[i]);
-            if (key == null) continue;
+            var kv = SplitKeyValue(parameters[i]);
+            if (kv is null) continue;
+            var (key, value) = kv.Value;
             if (key == "layer") { layerName = value; continue; }
             assignments.Add((key, value));
         }
@@ -137,17 +138,16 @@ public class UpdateButtonCommand(IDeviceController controller, IAssetService ass
         return Task.CompletedTask;
     }
 
-    private static (string Key, string Value) SplitKeyValue(string param)
+    private static (string Key, string Value)? SplitKeyValue(string param)
     {
-        if (string.IsNullOrWhiteSpace(param)) return (null, null);
+        if (string.IsNullOrWhiteSpace(param)) return null;
         var eq = param.IndexOf('=');
         if (eq < 0)
         {
             Console.WriteLine($"[UpdateButton] expected key=value, got '{param}'");
-            return (null, null);
+            return null;
         }
-        return (param.Substring(0, eq).Trim().ToLowerInvariant(),
-                param.Substring(eq + 1).Trim());
+        return (param[..eq].Trim().ToLowerInvariant(), param[(eq + 1)..].Trim());
     }
 
     /// <summary>
@@ -161,8 +161,10 @@ public class UpdateButtonCommand(IDeviceController controller, IAssetService ass
         if (!string.IsNullOrEmpty(nameHint))
         {
             foreach (var layer in button.Layers)
+            {
                 if (layer is TextLayer tl && string.Equals(tl.Name, nameHint, StringComparison.OrdinalIgnoreCase))
                     return tl;
+            }
         }
         else
         {
@@ -189,8 +191,10 @@ public class UpdateButtonCommand(IDeviceController controller, IAssetService ass
         if (!string.IsNullOrEmpty(nameHint))
         {
             foreach (var layer in button.Layers)
+            {
                 if (layer is ImageLayer il && string.Equals(il.Name, nameHint, StringComparison.OrdinalIgnoreCase))
                     return il;
+            }
         }
         else
         {
@@ -214,7 +218,7 @@ public class UpdateButtonCommand(IDeviceController controller, IAssetService ass
         if (string.IsNullOrWhiteSpace(value)) return false;
         try
         {
-            if (value.StartsWith("#"))
+            if (value.StartsWith('#'))
             {
                 color = Color.Parse(value);
                 return true;

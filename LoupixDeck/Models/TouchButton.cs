@@ -1,6 +1,7 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
 using Avalonia.Media;
+using CommunityToolkit.Mvvm.ComponentModel;
 using LoupixDeck.Models.Layers;
 using LoupixDeck.Utils;
 using Newtonsoft.Json;
@@ -38,45 +39,24 @@ public class TouchButton : LoupedeckButton
         }
     }
 
-    private bool _vibrationEnabled;
-
-    public bool VibrationEnabled
-    {
-        get => _vibrationEnabled;
-        set
-        {
-            if (value == _vibrationEnabled) return;
-            _vibrationEnabled = value;
-            OnPropertyChanged(nameof(VibrationEnabled));
-        }
-    }
-
-    private byte _vibrationPattern;
+    [ObservableProperty]
+    public partial bool VibrationEnabled { get; set; }
 
     public byte VibrationPattern
     {
-        get => _vibrationPattern == 0
-            ? LoupedeckDevice.Constants.VibrationPattern.ShortLower
-            : _vibrationPattern;
-        set
-        {
-            if (value == _vibrationPattern) return;
-            _vibrationPattern = value;
-            OnPropertyChanged(nameof(VibrationPattern));
-        }
+        get => field == 0 ? LoupedeckDevice.Constants.VibrationPattern.ShortLower : field;
+        set => SetProperty(ref field, value);
     }
-
-    private System.Collections.ObjectModel.ObservableCollection<LayerBase> _layers;
 
     public System.Collections.ObjectModel.ObservableCollection<LayerBase> Layers
     {
-        get => _layers;
+        get;
         set
         {
-            if (ReferenceEquals(_layers, value)) return;
-            DetachLayerHandlers(_layers);
-            _layers = value ?? new System.Collections.ObjectModel.ObservableCollection<LayerBase>();
-            AttachLayerHandlers(_layers);
+            if (ReferenceEquals(field, value)) return;
+            DetachLayerHandlers(field);
+            field = value ?? new System.Collections.ObjectModel.ObservableCollection<LayerBase>();
+            AttachLayerHandlers(field);
             Refresh();
             OnPropertyChanged(nameof(Layers));
         }
@@ -126,7 +106,7 @@ public class TouchButton : LoupedeckButton
         layers.CollectionChanged += Layers_CollectionChanged;
         foreach (var layer in layers)
         {
-            if (layer != null) layer.PropertyChanged += Layer_PropertyChanged;
+            layer?.PropertyChanged += Layer_PropertyChanged;
         }
     }
 
@@ -136,7 +116,7 @@ public class TouchButton : LoupedeckButton
         layers.CollectionChanged -= Layers_CollectionChanged;
         foreach (var layer in layers)
         {
-            if (layer != null) layer.PropertyChanged -= Layer_PropertyChanged;
+            layer?.PropertyChanged -= Layer_PropertyChanged;
         }
     }
 
@@ -145,13 +125,13 @@ public class TouchButton : LoupedeckButton
         if (e.OldItems != null)
         {
             foreach (LayerBase l in e.OldItems)
-                if (l != null) l.PropertyChanged -= Layer_PropertyChanged;
+                l?.PropertyChanged -= Layer_PropertyChanged;
         }
 
         if (e.NewItems != null)
         {
             foreach (LayerBase l in e.NewItems)
-                if (l != null) l.PropertyChanged += Layer_PropertyChanged;
+                l?.PropertyChanged += Layer_PropertyChanged;
         }
 
         Refresh();
@@ -173,7 +153,9 @@ public class TouchButton : LoupedeckButton
         {
             if (layer is PluginLayer plugin &&
                 string.Equals(plugin.OwnerKey, ownerKey, StringComparison.Ordinal))
+            {
                 return plugin;
+            }
         }
 
         var created = new PluginLayer
@@ -233,8 +215,8 @@ public class TouchButton : LoupedeckButton
     /// </summary>
     public void RewireLayerHandlers()
     {
-        if (_layers == null) return;
-        foreach (var layer in _layers)
+        if (Layers == null) return;
+        foreach (var layer in Layers)
         {
             if (layer == null) continue;
             layer.PropertyChanged -= Layer_PropertyChanged;

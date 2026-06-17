@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json;
 
 namespace LoupixDeck.Models.Layers;
@@ -10,25 +11,13 @@ namespace LoupixDeck.Models.Layers;
 /// <see cref="TouchButton"/> can re-render. Position/Scale are expressed in
 /// 90×90 device-pixel space; the editor canvas applies its own zoom factor.
 /// </summary>
-public abstract class LayerBase : INotifyPropertyChanged
+[ObservableObject]
+public abstract partial class LayerBase
 {
-    private string _name = string.Empty;
-    private bool _visible = true;
-    private int _positionX;
-    private int _positionY;
-    private double _scale = 1.0;
-    private double _scaleY;
-    private double _rotation;
-    private string _ownerKey;
-    private string _commandName;
-
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    public string Name
-    {
-        get => _name;
-        set => SetField(ref _name, value);
-    }
+    [ObservableProperty]
+    public partial string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Identifies the display command (core or plugin) that owns this layer's content.
@@ -39,15 +28,9 @@ public abstract class LayerBase : INotifyPropertyChanged
     /// <see cref="PluginLayerKey.For"/>. Persisted; absent in older configs (defaults null).
     /// </summary>
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-    public string OwnerKey
-    {
-        get => _ownerKey;
-        set
-        {
-            if (SetField(ref _ownerKey, value))
-                OnPropertyChanged(nameof(IsCommandOwned));
-        }
-    }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCommandOwned))]
+    public partial string OwnerKey { get; set; }
 
     /// <summary>
     /// Human-readable name of the owning display command (e.g. for the editor badge/info
@@ -55,15 +38,12 @@ public abstract class LayerBase : INotifyPropertyChanged
     /// otherwise. Persisted; absent in older configs.
     /// </summary>
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-    public string CommandName
-    {
-        get => _commandName;
-        set => SetField(ref _commandName, value);
-    }
+    [ObservableProperty]
+    public partial string CommandName { get; set; }
 
     /// <summary>True when this layer's content is owned by a display command (core or plugin).</summary>
     [JsonIgnore]
-    public bool IsCommandOwned => !string.IsNullOrEmpty(_ownerKey);
+    public bool IsCommandOwned => !string.IsNullOrEmpty(OwnerKey);
 
     /// <summary>
     /// True when the layer was created by its owning command (vs adopted from a pre-existing
@@ -74,61 +54,35 @@ public abstract class LayerBase : INotifyPropertyChanged
     [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
     public bool OwnerCreated { get; set; }
 
-    public bool Visible
-    {
-        get => _visible;
-        set => SetField(ref _visible, value);
-    }
+    [ObservableProperty]
+    public partial bool Visible { get; set; } = true;
 
-    public int PositionX
-    {
-        get => _positionX;
-        set => SetField(ref _positionX, value);
-    }
+    [ObservableProperty]
+    public partial int PositionX { get; set; }
 
-    public int PositionY
-    {
-        get => _positionY;
-        set => SetField(ref _positionY, value);
-    }
+    [ObservableProperty]
+    public partial int PositionY { get; set; }
 
-    public double Scale
-    {
-        get => _scale;
-        set
-        {
-            if (SetField(ref _scale, value))
-            {
-                OnPropertyChanged(nameof(EffectiveScaleX));
-                OnPropertyChanged(nameof(EffectiveScaleY));
-                OnDisplaySizeChanged();
-            }
-        }
-    }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EffectiveScaleX), nameof(EffectiveScaleY))]
+    public partial double Scale { get; set; } = 1.0;
+    partial void OnScaleChanging(double value) => OnDisplaySizeChanged();
 
     /// <summary>
     /// Optional Y-axis multiplier. <c>0</c> means "follow <see cref="Scale"/>" so
     /// existing layers keep uniform behavior; anything &gt; 0 enables anisotropic
     /// resize (e.g. Shift-drag breaks aspect lock).
     /// </summary>
-    public double ScaleY
-    {
-        get => _scaleY;
-        set
-        {
-            if (SetField(ref _scaleY, value))
-            {
-                OnPropertyChanged(nameof(EffectiveScaleY));
-                OnDisplaySizeChanged();
-            }
-        }
-    }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EffectiveScaleY))]
+    public partial double ScaleY { get; set; }
+    partial void OnScaleYChanging(double value) => OnDisplaySizeChanged();
 
     [JsonIgnore]
-    public double EffectiveScaleX => _scale <= 0 ? 1.0 : _scale;
+    public double EffectiveScaleX => Scale <= 0 ? 1.0 : Scale;
 
     [JsonIgnore]
-    public double EffectiveScaleY => _scaleY > 0 ? _scaleY : EffectiveScaleX;
+    public double EffectiveScaleY => ScaleY > 0 ? ScaleY : EffectiveScaleX;
 
     /// <summary>
     /// Displayed width of the layer in 90×90 device-pixel space. Bridges the
@@ -165,21 +119,11 @@ public abstract class LayerBase : INotifyPropertyChanged
         OnPropertyChanged(nameof(DisplayHeight));
     }
 
-    public double Rotation
-    {
-        get => _rotation;
-        set => SetField(ref _rotation, value);
-    }
+    [ObservableProperty]
+    public partial double Rotation { get; set;  }
 
     [JsonIgnore]
     public abstract string LayerKind { get; }
-
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
 
     protected bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
     {

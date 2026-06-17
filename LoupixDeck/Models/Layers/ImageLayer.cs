@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json;
 using SkiaSharp;
 
@@ -8,54 +9,37 @@ namespace LoupixDeck.Models.Layers;
 /// by relative path; the actual bitmap is loaded lazily via the asset service
 /// and cached in <see cref="CachedImage"/>.
 /// </summary>
-public class ImageLayer : LayerBase
+public partial class ImageLayer : LayerBase
 {
     public const string Kind = "image";
 
     /// <summary>Device-pixel frame size the image is fitted into (90×90 button).</summary>
     private const double DeviceBaseSize = 90.0;
 
-    private string _assetRelativePath;
-    private SerializableRect _sourceRect = SerializableRect.Empty;
-    private SKBitmap _cachedImage;
-
-    public string AssetRelativePath
+    [ObservableProperty]
+    public partial string AssetRelativePath { get; set; }
+    partial void OnAssetRelativePathChanged(string oldValue, string newValue)
     {
-        get => _assetRelativePath;
-        set
-        {
-            if (SetField(ref _assetRelativePath, value))
-            {
-                _cachedImage = null;
-                OnPropertyChanged(nameof(CachedImage));
-            }
-        }
+        CachedImage = null;
+        OnPropertyChanged(nameof(CachedImage));
     }
 
     /// <summary>
     /// Crop window on the original image. <see cref="SerializableRect.Empty"/>
     /// means "use the full image".
     /// </summary>
-    public SerializableRect SourceRect
-    {
-        get => _sourceRect;
-        set
-        {
-            if (SetField(ref _sourceRect, value))
-                OnDisplaySizeChanged();
-        }
-    }
+    [ObservableProperty]
+    public partial SerializableRect SourceRect { get; set; } = SerializableRect.Empty;
+    partial void OnSourceRectChanging(SerializableRect value) => OnDisplaySizeChanged();
 
     [JsonIgnore]
     public SKBitmap CachedImage
     {
-        get => _cachedImage;
+        get;
         set
         {
-            if (ReferenceEquals(_cachedImage, value)) return;
-            _cachedImage = value;
-            OnPropertyChanged();
-            OnDisplaySizeChanged();
+            if (SetProperty(ref field, value, ReferenceEqualityComparer.Instance))
+                OnDisplaySizeChanged();
         }
     }
 
@@ -65,11 +49,11 @@ public class ImageLayer : LayerBase
     /// </summary>
     private (double Width, double Height)? GetSourceDimensions()
     {
-        if (!_sourceRect.IsEmpty && _sourceRect.Width > 0 && _sourceRect.Height > 0)
-            return (_sourceRect.Width, _sourceRect.Height);
+        if (!SourceRect.IsEmpty && SourceRect.Width > 0 && SourceRect.Height > 0)
+            return (SourceRect.Width, SourceRect.Height);
 
-        if (_cachedImage is { Width: > 0, Height: > 0 })
-            return (_cachedImage.Width, _cachedImage.Height);
+        if (CachedImage is { Width: > 0, Height: > 0 })
+            return (CachedImage.Width, CachedImage.Height);
 
         return null;
     }

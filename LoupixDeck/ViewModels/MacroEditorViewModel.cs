@@ -1,8 +1,8 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Windows.Input;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LoupixDeck.Models;
 using LoupixDeck.Models.Converter;
@@ -21,7 +21,7 @@ namespace LoupixDeck.ViewModels;
 /// applies every valid change immediately (debounced) back into the
 /// <see cref="IMacroManager"/> — there is no explicit save step.
 /// </summary>
-public class MacroEditorViewModel : DialogViewModelBase<DialogResult>, IAsyncInitViewModel
+public partial class MacroEditorViewModel : DialogViewModelBase<DialogResult>, IAsyncInitViewModel
 {
     // Serializer used for deep-cloning macros (working copies).
     private static readonly JsonSerializerSettings CloneSettings = new()
@@ -50,37 +50,17 @@ public class MacroEditorViewModel : DialogViewModelBase<DialogResult>, IAsyncIni
     /// <summary>Command tree offered inside CommandStep editors.</summary>
     public ObservableCollection<MenuEntry> SystemCommandMenus { get; } = [];
 
-    private Macro _selectedMacro;
-
-    public Macro SelectedMacro
-    {
-        get => _selectedMacro;
-        set
-        {
-            if (SetProperty(ref _selectedMacro, value))
-                OnPropertyChanged(nameof(HasSelectedMacro));
-        }
-    }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSelectedMacro))]
+    public partial Macro SelectedMacro { get; set; }
 
     public bool HasSelectedMacro => SelectedMacro != null;
 
-    private string _validationMessage = string.Empty;
-
-    public string ValidationMessage
-    {
-        get => _validationMessage;
-        private set
-        {
-            if (SetProperty(ref _validationMessage, value))
-                OnPropertyChanged(nameof(HasValidationMessage));
-        }
-    }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasValidationMessage))]
+    public partial string ValidationMessage { get; private set; } = string.Empty;
 
     public bool HasValidationMessage => !string.IsNullOrEmpty(ValidationMessage);
-
-    public ICommand AddMacroCommand { get; }
-    public ICommand RemoveMacroCommand { get; }
-    public ICommand AddStepCommand { get; }
 
     public MacroEditorViewModel(IMacroManager macroManager, ICommandBuilder commandBuilder,
         IMenuTreeBuilder menuTreeBuilder)
@@ -106,10 +86,6 @@ public class MacroEditorViewModel : DialogViewModelBase<DialogResult>, IAsyncIni
             _applyTimer.Stop();
             Apply();
         };
-
-        AddMacroCommand = new RelayCommand(AddMacro);
-        RemoveMacroCommand = new RelayCommand(RemoveMacro);
-        AddStepCommand = new RelayCommand<string>(AddStep);
     }
 
     public async Task InitializeAsync()
@@ -118,6 +94,7 @@ public class MacroEditorViewModel : DialogViewModelBase<DialogResult>, IAsyncIni
         await _menuTreeBuilder.BuildInto(SystemCommandMenus, ButtonTargets.TouchButton);
     }
 
+    [RelayCommand]
     private void AddMacro()
     {
         var macro = new Macro { Name = GenerateMacroName() };
@@ -125,6 +102,7 @@ public class MacroEditorViewModel : DialogViewModelBase<DialogResult>, IAsyncIni
         SelectedMacro = macro;
     }
 
+    [RelayCommand]
     private void RemoveMacro()
     {
         if (SelectedMacro == null)
@@ -135,6 +113,7 @@ public class MacroEditorViewModel : DialogViewModelBase<DialogResult>, IAsyncIni
         SelectedMacro = Macros.Count > 0 ? Macros[Math.Min(index, Macros.Count - 1)] : null;
     }
 
+    [RelayCommand]
     private void AddStep(string stepType)
     {
         if (SelectedMacro == null || !Enum.TryParse<MacroStepType>(stepType, out var type))
@@ -185,12 +164,16 @@ public class MacroEditorViewModel : DialogViewModelBase<DialogResult>, IAsyncIni
     private void Macros_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.OldItems != null)
+        {
             foreach (Macro macro in e.OldItems)
                 Detach(macro);
+        }
 
         if (e.NewItems != null)
+        {
             foreach (Macro macro in e.NewItems)
                 Attach(macro);
+        }
 
         ScheduleApply();
     }
@@ -220,12 +203,16 @@ public class MacroEditorViewModel : DialogViewModelBase<DialogResult>, IAsyncIni
     private void Steps_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.OldItems != null)
+        {
             foreach (MacroStep step in e.OldItems)
                 step.PropertyChanged -= Step_PropertyChanged;
+        }
 
         if (e.NewItems != null)
+        {
             foreach (MacroStep step in e.NewItems)
                 step.PropertyChanged += Step_PropertyChanged;
+        }
 
         ScheduleApply();
     }

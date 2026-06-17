@@ -19,7 +19,7 @@ public class ScalingOptionConverter : IValueConverter
                 BitmapHelper.ScalingOption.Tile => "Tile - The image is displayed several times next to each other/repeatedly",
                 BitmapHelper.ScalingOption.Center => "Center - The image is displayed centered without scaling",
                 //BitmapHelper.ScalingOption.CropToFill => "Crop to Fill - Like 'Fill', but with cropping instead of distortion",
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new ArgumentOutOfRangeException(nameof(value))
             };
         }
 

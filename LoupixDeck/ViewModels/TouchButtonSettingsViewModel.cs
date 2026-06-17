@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using LoupixDeck.Models;
 using LoupixDeck.Models.Converter;
 using LoupixDeck.Models.Layers;
@@ -13,7 +15,7 @@ using SkiaSharp;
 
 namespace LoupixDeck.ViewModels;
 
-public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, DialogResult>, IAsyncInitViewModel
+public partial class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, DialogResult>, IAsyncInitViewModel
 
 {
     public override void Initialize(TouchButton parameter)
@@ -137,15 +139,14 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
         ZoomFactor = fit;
     }
 
+    [RelayCommand]
     private void ZoomIn() => ZoomFactor *= 1.25;
+    [RelayCommand]
     private void ZoomOut() => ZoomFactor /= 1.25;
+    [RelayCommand]
     private void ResetZoom() => ZoomFactor = 1.0;
+    [RelayCommand]
     private void Fit() => FitToViewport();
-
-    public ICommand ZoomInCommand { get; }
-    public ICommand ZoomOutCommand { get; }
-    public ICommand ResetZoomCommand { get; }
-    public ICommand FitCommand { get; }
 
     // ───────── Side-strip (Razer) mode ─────────
 
@@ -314,42 +315,16 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
     /// step used when <see cref="SnapToGrid"/> is active.</summary>
     public const int GridStepDevice = 10;
 
-    private bool _showGrid;
-
     /// <summary>Toggles the alignment grid overlay in the preview canvas.</summary>
-    public bool ShowGrid
-    {
-        get => _showGrid;
-        set
-        {
-            if (_showGrid == value) return;
-            _showGrid = value;
-            OnPropertyChanged(nameof(ShowGrid));
-            UpdateEditorPreview();
-        }
-    }
+    [ObservableProperty]
+    public partial bool ShowGrid { get; set; }
 
-    private bool _snapToGrid;
+    partial void OnShowGridChanged(bool value) => UpdateEditorPreview();
 
     /// <summary>When enabled, dragging a layer snaps its top-left edge to the grid.</summary>
-    public bool SnapToGrid
-    {
-        get => _snapToGrid;
-        set
-        {
-            if (_snapToGrid == value) return;
-            _snapToGrid = value;
-            OnPropertyChanged(nameof(SnapToGrid));
-        }
-    }
+    [ObservableProperty]
+    public partial bool SnapToGrid { get; set; }
 
-
-    public ICommand AddImageLayerCommand { get; }
-    public ICommand AddTextLayerCommand { get; }
-    public ICommand AddSymbolLayerCommand { get; }
-    public ICommand RemoveLayerCommand { get; }
-    public ICommand MoveLayerUpCommand { get; }
-    public ICommand MoveLayerDownCommand { get; }
     public TouchButton ButtonData { get; set; }
 
     /// <summary>1-based button number shared by the window title and the
@@ -409,38 +384,17 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
     /// On-canvas (editor-preview coordinates) bounds of the currently selected
     /// layer. Bound to the selection overlay rectangle in the XAML.
     /// </summary>
-    public Avalonia.Rect SelectionBounds
-    {
-        get => _selectionBounds;
-        private set
-        {
-            if (_selectionBounds == value) return;
-            _selectionBounds = value;
-            OnPropertyChanged(nameof(SelectionBounds));
-            OnPropertyChanged(nameof(SelectionVisible));
-            OnPropertyChanged(nameof(ScaleHandlesVisible));
-            OnPropertyChanged(nameof(SelectionLeft));
-            OnPropertyChanged(nameof(SelectionTop));
-            OnPropertyChanged(nameof(SelectionWidth));
-            OnPropertyChanged(nameof(SelectionHeight));
-            OnPropertyChanged(nameof(HandleNwLeft));
-            OnPropertyChanged(nameof(HandleNwTop));
-            OnPropertyChanged(nameof(HandleNeLeft));
-            OnPropertyChanged(nameof(HandleNeTop));
-            OnPropertyChanged(nameof(HandleSwLeft));
-            OnPropertyChanged(nameof(HandleSwTop));
-            OnPropertyChanged(nameof(HandleSeLeft));
-            OnPropertyChanged(nameof(HandleSeTop));
-            OnPropertyChanged(nameof(HandleNLeft));
-            OnPropertyChanged(nameof(HandleNTop));
-            OnPropertyChanged(nameof(HandleSLeft));
-            OnPropertyChanged(nameof(HandleSTop));
-            OnPropertyChanged(nameof(HandleWLeft));
-            OnPropertyChanged(nameof(HandleWTop));
-            OnPropertyChanged(nameof(HandleELeft));
-            OnPropertyChanged(nameof(HandleETop));
-        }
-    }
+    [ObservableProperty]
+
+    [NotifyPropertyChangedFor(
+            nameof(SelectionBounds), nameof(SelectionVisible), nameof(ScaleHandlesVisible),
+            nameof(SelectionLeft), nameof(SelectionTop), nameof(SelectionWidth), nameof(SelectionHeight),
+            nameof(HandleNwLeft), nameof(HandleNwTop), nameof(HandleNeLeft), nameof(HandleNeTop),
+            nameof(HandleSwLeft), nameof(HandleSwTop), nameof(HandleSeLeft), nameof(HandleSeTop),
+            nameof(HandleNLeft), nameof(HandleNTop), nameof(HandleSLeft), nameof(HandleSTop),
+            nameof(HandleWLeft), nameof(HandleWTop), nameof(HandleELeft), nameof(HandleETop)
+        )]
+    public partial Avalonia.Rect SelectionBounds { get; private set; }
 
     public bool SelectionVisible => _selectedLayer != null &&
                                     _selectionBounds.Width > 0 && _selectionBounds.Height > 0;
@@ -456,8 +410,8 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
     public double SelectionHeight => _selectionBounds.Height;
 
     public const double HandleSize = 8;
-    private double Hx(double cx) => cx - HandleSize / 2.0;
-    private double Hy(double cy) => cy - HandleSize / 2.0;
+    private static double Hx(double cx) => cx - (HandleSize / 2.0);
+    private static double Hy(double cy) => cy - (HandleSize / 2.0);
     public double HandleNwLeft => Hx(SelectionLeft);
     public double HandleNwTop  => Hy(SelectionTop);
     public double HandleNeLeft => Hx(SelectionLeft + SelectionWidth);
@@ -466,16 +420,16 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
     public double HandleSwTop  => Hy(SelectionTop + SelectionHeight);
     public double HandleSeLeft => Hx(SelectionLeft + SelectionWidth);
     public double HandleSeTop  => Hy(SelectionTop + SelectionHeight);
-    public double HandleNLeft  => Hx(SelectionLeft + SelectionWidth / 2.0);
+    public double HandleNLeft  => Hx(SelectionLeft + (SelectionWidth / 2.0));
     public double HandleNTop   => Hy(SelectionTop);
-    public double HandleSLeft  => Hx(SelectionLeft + SelectionWidth / 2.0);
+    public double HandleSLeft  => Hx(SelectionLeft + (SelectionWidth / 2.0));
     public double HandleSTop   => Hy(SelectionTop + SelectionHeight);
     public double HandleWLeft  => Hx(SelectionLeft);
-    public double HandleWTop   => Hy(SelectionTop + SelectionHeight / 2.0);
+    public double HandleWTop   => Hy(SelectionTop + (SelectionHeight / 2.0));
     public double HandleELeft  => Hx(SelectionLeft + SelectionWidth);
-    public double HandleETop   => Hy(SelectionTop + SelectionHeight / 2.0);
+    public double HandleETop   => Hy(SelectionTop + (SelectionHeight / 2.0));
 
-    public ObservableCollection<MenuEntry> SystemCommandMenus { get; set; }
+    public ObservableCollection<MenuEntry> SystemCommandMenus { get; set; } = new();
     public MenuEntry CurrentMenuEntry { get; set; }
 
     public ObservableCollection<VibrationPatternItem> VibrationPatterns => VibrationPatternCatalog.All;
@@ -494,6 +448,9 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
         }
     }
 
+    public ICommand RemoveLayerCommand => RemoveSelectedLayerCommand;
+    public ICommand MoveLayerUpCommand => MoveSelectedLayerUpCommand;
+    public ICommand MoveLayerDownCommand => MoveSelectedLayerDownCommand;
     public TouchButtonSettingsViewModel(
         ICommandBuilder commandBuilder,
         IMenuTreeBuilder menuTreeBuilder,
@@ -515,19 +472,6 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
 
         // The provider list can change on a plugin hot-reload while the editor is open.
         _sideStripRegistry.ProvidersChanged += OnStripProvidersChanged;
-
-        AddImageLayerCommand = new AsyncRelayCommand(AddImageLayer);
-        AddTextLayerCommand = new RelayCommand(AddTextLayer);
-        AddSymbolLayerCommand = new AsyncRelayCommand(AddSymbolLayer);
-        RemoveLayerCommand = new RelayCommand(RemoveSelectedLayer);
-        MoveLayerUpCommand = new RelayCommand(MoveSelectedLayerUp);
-        MoveLayerDownCommand = new RelayCommand(MoveSelectedLayerDown);
-        ZoomInCommand = new RelayCommand(ZoomIn);
-        ZoomOutCommand = new RelayCommand(ZoomOut);
-        ResetZoomCommand = new RelayCommand(ResetZoom);
-        FitCommand = new RelayCommand(Fit);
-
-        SystemCommandMenus = new ObservableCollection<MenuEntry>();
     }
 
     public async Task InitializeAsync()
@@ -558,6 +502,7 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
         return $"{baseName} {index}";
     }
 
+    [RelayCommand]
     private async Task AddImageLayer()
     {
         var path = await FileDialogHelper.OpenFileDialog();
@@ -577,6 +522,7 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
         SelectedLayer = layer;
     }
 
+    [RelayCommand]
     private void AddTextLayer()
     {
         // Cap the default box to a compact, square-ish size so a tall surface (e.g. the
@@ -594,6 +540,7 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
         SelectedLayer = layer;
     }
 
+    [RelayCommand]
     private async Task AddSymbolLayer()
     {
         if (ButtonData == null) return;
@@ -634,6 +581,7 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
         symbol.Name = def.DisplayName;
     }
 
+    [RelayCommand]
     private void RemoveSelectedLayer()
     {
         // Command-owned layers are owned by their bound command; they are removed by unbinding
@@ -648,6 +596,7 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
         ReselectAfterMove(next);
     }
 
+    [RelayCommand]
     private void MoveSelectedLayerUp()
     {
         if (_selectedLayer == null) return;
@@ -658,6 +607,7 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
         ReselectAfterMove(layer);
     }
 
+    [RelayCommand]
     private void MoveSelectedLayerDown()
     {
         if (_selectedLayer == null) return;
@@ -696,8 +646,10 @@ public class TouchButtonSettingsViewModel : DialogViewModelBase<TouchButton, Dia
         // For a free-draw strip, also clear all three per-segment commands (the strip's
         // "command" is the three segments, not ButtonData.Command).
         if (IsSegmentCommandMode && _stripPage != null)
+        {
             for (var i = 0; i < RotaryButtonPage.StripSegmentCount; i++)
                 _stripPage.SetStripSegmentCommand(i, null);
+        }
 
         var b = ButtonData;
         b.IgnoreRefresh = true;

@@ -1,9 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json;
-using SkiaSharp;
 
 namespace LoupixDeck.Models;
 
@@ -11,24 +9,18 @@ namespace LoupixDeck.Models;
 /// This data model holds all configuration settings,
 /// which are loaded and saved via JSON.
 /// </summary>
-public class LoupedeckConfig : INotifyPropertyChanged
+[ObservableObject]
+public partial class LoupedeckConfig
 {
-    private int _currentRotaryPageIndex = -1;
-    private int _currentLeftRotaryPageIndex = -1;
-    private int _currentRightRotaryPageIndex = -1;
-    private int _currentTouchPageIndex = -1;
-
-    private int _brightness = 100;
-
     public LoupedeckConfig()
     {
         // Newtonsoft populates the field-initialized collections in place (no
         // ObjectCreationHandling.Replace), so the property setters never fire on
         // load — subscribe here to keep the page-count labels in sync.
-        _rotaryButtonPages.CollectionChanged += OnRotaryPagesChanged;
-        _leftRotaryButtonPages.CollectionChanged += OnLeftRotaryPagesChanged;
-        _rightRotaryButtonPages.CollectionChanged += OnRightRotaryPagesChanged;
-        _touchButtonPages.CollectionChanged += OnTouchPagesChanged;
+        RotaryButtonPages.CollectionChanged += OnRotaryPagesChanged;
+        LeftRotaryButtonPages.CollectionChanged += OnLeftRotaryPagesChanged;
+        RightRotaryButtonPages.CollectionChanged += OnRightRotaryPagesChanged;
+        TouchButtonPages.CollectionChanged += OnTouchPagesChanged;
     }
 
     /// <summary>
@@ -75,97 +67,65 @@ public class LoupedeckConfig : INotifyPropertyChanged
     // instead of SendInput, so injected input reaches raw-input apps (games / anti-cheat).
     // null = "auto" (active when the driver is installed); false = explicitly off.
     // Missing in older config.json simply stays null → auto behaviour (backward compatible).
-    private bool? _interceptionEnabled;
-    public bool? InterceptionEnabled
-    {
-        get => _interceptionEnabled;
-        set { if (_interceptionEnabled == value) return; _interceptionEnabled = value; OnPropertyChanged(); }
-    }
+    [ObservableProperty]
+    public partial bool? InterceptionEnabled { get; set; }
 
     // Visual flash overlay on touch press — useful especially on the Razer
     // (no LED ring on touch buttons) so the user gets visible feedback.
-    private bool _touchFeedbackEnabled;
-    public bool TouchFeedbackEnabled
-    {
-        get => _touchFeedbackEnabled;
-        set { if (_touchFeedbackEnabled == value) return; _touchFeedbackEnabled = value; OnPropertyChanged(); }
-    }
+    [ObservableProperty]
+    public partial bool TouchFeedbackEnabled { get; set; }
+    [ObservableProperty]
+    public partial Avalonia.Media.Color TouchFeedbackColor { get; set; } = Avalonia.Media.Colors.White;
 
-    private Avalonia.Media.Color _touchFeedbackColor = Avalonia.Media.Colors.White;
-    public Avalonia.Media.Color TouchFeedbackColor
-    {
-        get => _touchFeedbackColor;
-        set { if (_touchFeedbackColor == value) return; _touchFeedbackColor = value; OnPropertyChanged(); }
-    }
-
-    private double _touchFeedbackOpacity = 0.5;
     public double TouchFeedbackOpacity
     {
-        get => _touchFeedbackOpacity;
-        set { if (Math.Abs(_touchFeedbackOpacity - value) < 0.0001) return; _touchFeedbackOpacity = value; OnPropertyChanged(); }
-    }
+        get;
+        set { if (Math.Abs(field - value) < 0.0001) return; field = value; OnPropertyChanged(); }
+    } = 0.5;
 
     // While a finger is down, ignore further TOUCH_START events until TOUCH_END.
     // Defends against the device emitting duplicate TOUCH_START at button
     // boundaries or when the finger slides across slots.
-    private bool _touchSlidingPreventionEnabled = true;
-    public bool TouchSlidingPreventionEnabled
-    {
-        get => _touchSlidingPreventionEnabled;
-        set { if (_touchSlidingPreventionEnabled == value) return; _touchSlidingPreventionEnabled = value; OnPropertyChanged(); }
-    }
+    [ObservableProperty]
+    public partial bool TouchSlidingPreventionEnabled { get; set; } = true;
 
     public SimpleButton[] SimpleButtons { get; set; }
 
-    private ObservableCollection<RotaryButtonPage> _rotaryButtonPages = [];
     public ObservableCollection<RotaryButtonPage> RotaryButtonPages
     {
-        get => _rotaryButtonPages;
+        get;
         set
         {
-            if (ReferenceEquals(_rotaryButtonPages, value)) return;
-            if (_rotaryButtonPages != null)
-                _rotaryButtonPages.CollectionChanged -= OnRotaryPagesChanged;
-            _rotaryButtonPages = value;
-            if (_rotaryButtonPages != null)
-                _rotaryButtonPages.CollectionChanged += OnRotaryPagesChanged;
+            if (ReferenceEquals(field, value)) return;
+            field?.CollectionChanged -= OnRotaryPagesChanged;
+            field = value;
+            field?.CollectionChanged += OnRotaryPagesChanged;
             OnPropertyChanged();
             OnPropertyChanged(nameof(RotaryPageLabel));
         }
-    }
+    } = [];
 
     private void OnRotaryPagesChanged(object sender, NotifyCollectionChangedEventArgs e)
         => OnPropertyChanged(nameof(RotaryPageLabel));
 
     [JsonIgnore]
-    public int CurrentRotaryPageIndex
-    {
-        get => _currentRotaryPageIndex;
-        set
-        {
-            if (_currentRotaryPageIndex != value)
-            {
-                _currentRotaryPageIndex = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(CurrentRotaryButtonPage));
-                OnPropertyChanged(nameof(RotaryPageLabel));
-            }
-        }
-    }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentRotaryButtonPage), nameof(RotaryPageLabel))]
+    public partial int CurrentRotaryPageIndex { get; set; } = -1;
 
     [JsonIgnore]
     public RotaryButtonPage CurrentRotaryButtonPage =>
         (RotaryButtonPages != null &&
-         _currentRotaryPageIndex >= 0 &&
-         _currentRotaryPageIndex < RotaryButtonPages.Count)
-            ? RotaryButtonPages[_currentRotaryPageIndex]
+         CurrentRotaryPageIndex >= 0 &&
+         CurrentRotaryPageIndex < RotaryButtonPages.Count)
+            ? RotaryButtonPages[CurrentRotaryPageIndex]
             : null;
 
     /// <summary>"current / total" label for the rotary pager (1-based).</summary>
     [JsonIgnore]
     public string RotaryPageLabel =>
         RotaryButtonPages is { Count: > 0 }
-            ? $"{Math.Clamp(_currentRotaryPageIndex + 1, 1, RotaryButtonPages.Count)} / {RotaryButtonPages.Count}"
+            ? $"{Math.Clamp(CurrentRotaryPageIndex + 1, 1, RotaryButtonPages.Count)} / {RotaryButtonPages.Count}"
             : "0 / 0";
 
     // --- Independent left/right rotary pages (devices with side strips) -------
@@ -174,187 +134,119 @@ public class LoupedeckConfig : INotifyPropertyChanged
     // knobs (3 on the Razer, re-indexed 0-based per side). Devices without side
     // strips (Live S) leave these empty and keep using RotaryButtonPages (Both).
 
-    private ObservableCollection<RotaryButtonPage> _leftRotaryButtonPages = [];
     public ObservableCollection<RotaryButtonPage> LeftRotaryButtonPages
     {
-        get => _leftRotaryButtonPages;
+        get;
         set
         {
-            if (ReferenceEquals(_leftRotaryButtonPages, value)) return;
-            if (_leftRotaryButtonPages != null)
-                _leftRotaryButtonPages.CollectionChanged -= OnLeftRotaryPagesChanged;
-            _leftRotaryButtonPages = value;
-            if (_leftRotaryButtonPages != null)
-                _leftRotaryButtonPages.CollectionChanged += OnLeftRotaryPagesChanged;
+            if (ReferenceEquals(field, value)) return;
+            field?.CollectionChanged -= OnLeftRotaryPagesChanged;
+            field = value;
+            field?.CollectionChanged += OnLeftRotaryPagesChanged;
             OnPropertyChanged();
             OnPropertyChanged(nameof(LeftRotaryPageLabel));
         }
-    }
+    } = [];
 
     private void OnLeftRotaryPagesChanged(object sender, NotifyCollectionChangedEventArgs e)
         => OnPropertyChanged(nameof(LeftRotaryPageLabel));
 
-    private ObservableCollection<RotaryButtonPage> _rightRotaryButtonPages = [];
     public ObservableCollection<RotaryButtonPage> RightRotaryButtonPages
     {
-        get => _rightRotaryButtonPages;
+        get;
         set
         {
-            if (ReferenceEquals(_rightRotaryButtonPages, value)) return;
-            if (_rightRotaryButtonPages != null)
-                _rightRotaryButtonPages.CollectionChanged -= OnRightRotaryPagesChanged;
-            _rightRotaryButtonPages = value;
-            if (_rightRotaryButtonPages != null)
-                _rightRotaryButtonPages.CollectionChanged += OnRightRotaryPagesChanged;
+            if (ReferenceEquals(field, value)) return;
+            field?.CollectionChanged -= OnRightRotaryPagesChanged;
+            field = value;
+            field?.CollectionChanged += OnRightRotaryPagesChanged;
             OnPropertyChanged();
             OnPropertyChanged(nameof(RightRotaryPageLabel));
         }
-    }
+    } = [];
 
     private void OnRightRotaryPagesChanged(object sender, NotifyCollectionChangedEventArgs e)
         => OnPropertyChanged(nameof(RightRotaryPageLabel));
 
     [JsonIgnore]
-    public int CurrentLeftRotaryPageIndex
-    {
-        get => _currentLeftRotaryPageIndex;
-        set
-        {
-            if (_currentLeftRotaryPageIndex == value) return;
-            _currentLeftRotaryPageIndex = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(CurrentLeftRotaryButtonPage));
-            OnPropertyChanged(nameof(LeftRotaryPageLabel));
-        }
-    }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentLeftRotaryButtonPage), nameof(LeftRotaryPageLabel))]
+    public partial int CurrentLeftRotaryPageIndex { get; set; } = -1;
 
     [JsonIgnore]
-    public int CurrentRightRotaryPageIndex
-    {
-        get => _currentRightRotaryPageIndex;
-        set
-        {
-            if (_currentRightRotaryPageIndex == value) return;
-            _currentRightRotaryPageIndex = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(CurrentRightRotaryButtonPage));
-            OnPropertyChanged(nameof(RightRotaryPageLabel));
-        }
-    }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentRightRotaryButtonPage), nameof(RightRotaryPageLabel))]
+    public partial int CurrentRightRotaryPageIndex { get; set; } = -1;
 
     [JsonIgnore]
     public RotaryButtonPage CurrentLeftRotaryButtonPage =>
         (LeftRotaryButtonPages != null &&
-         _currentLeftRotaryPageIndex >= 0 &&
-         _currentLeftRotaryPageIndex < LeftRotaryButtonPages.Count)
-            ? LeftRotaryButtonPages[_currentLeftRotaryPageIndex]
+         CurrentLeftRotaryPageIndex >= 0 &&
+         CurrentLeftRotaryPageIndex < LeftRotaryButtonPages.Count)
+            ? LeftRotaryButtonPages[CurrentLeftRotaryPageIndex]
             : null;
 
     [JsonIgnore]
     public RotaryButtonPage CurrentRightRotaryButtonPage =>
         (RightRotaryButtonPages != null &&
-         _currentRightRotaryPageIndex >= 0 &&
-         _currentRightRotaryPageIndex < RightRotaryButtonPages.Count)
-            ? RightRotaryButtonPages[_currentRightRotaryPageIndex]
+         CurrentRightRotaryPageIndex >= 0 &&
+         CurrentRightRotaryPageIndex < RightRotaryButtonPages.Count)
+            ? RightRotaryButtonPages[CurrentRightRotaryPageIndex]
             : null;
 
     /// <summary>"current / total" label for the left rotary pager (1-based).</summary>
     [JsonIgnore]
-    public string LeftRotaryPageLabel =>
-        LeftRotaryButtonPages is { Count: > 0 }
-            ? $"{Math.Clamp(_currentLeftRotaryPageIndex + 1, 1, LeftRotaryButtonPages.Count)} / {LeftRotaryButtonPages.Count}"
-            : "0 / 0";
+    public string LeftRotaryPageLabel => FormatLabel(LeftRotaryButtonPages, CurrentLeftRotaryPageIndex);
 
     /// <summary>"current / total" label for the right rotary pager (1-based).</summary>
     [JsonIgnore]
-    public string RightRotaryPageLabel =>
-        RightRotaryButtonPages is { Count: > 0 }
-            ? $"{Math.Clamp(_currentRightRotaryPageIndex + 1, 1, RightRotaryButtonPages.Count)} / {RightRotaryButtonPages.Count}"
-            : "0 / 0";
+    public string RightRotaryPageLabel => FormatLabel(RightRotaryButtonPages, CurrentRightRotaryPageIndex);
 
     // Strip rendering mode is per rotary page (see RotaryButtonPage.StripMode), not
     // global per side — each page on a column can independently be Segmented/FreeDraw.
 
-    private ObservableCollection<TouchButtonPage> _touchButtonPages = [];
     public ObservableCollection<TouchButtonPage> TouchButtonPages
     {
-        get => _touchButtonPages;
+        get;
         set
         {
-            if (ReferenceEquals(_touchButtonPages, value)) return;
-            if (_touchButtonPages != null)
-                _touchButtonPages.CollectionChanged -= OnTouchPagesChanged;
-            _touchButtonPages = value;
-            if (_touchButtonPages != null)
-                _touchButtonPages.CollectionChanged += OnTouchPagesChanged;
+            if (ReferenceEquals(field, value)) return;
+            field?.CollectionChanged -= OnTouchPagesChanged;
+            field = value;
+            field?.CollectionChanged += OnTouchPagesChanged;
             OnPropertyChanged();
             OnPropertyChanged(nameof(TouchPageLabel));
         }
-    }
+    } = [];
 
     private void OnTouchPagesChanged(object sender, NotifyCollectionChangedEventArgs e)
         => OnPropertyChanged(nameof(TouchPageLabel));
 
     [JsonIgnore]
-    public int CurrentTouchPageIndex
-    {
-        get => _currentTouchPageIndex;
-        set
-        {
-            if (_currentTouchPageIndex != value)
-            {
-                _currentTouchPageIndex = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(CurrentTouchButtonPage));
-                OnPropertyChanged(nameof(TouchPageLabel));
-            }
-        }
-    }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CurrentTouchButtonPage), nameof(TouchPageLabel))]
+    public partial int CurrentTouchPageIndex { get; set; } = -1;
 
     [JsonIgnore]
     public TouchButtonPage CurrentTouchButtonPage =>
-        _currentTouchPageIndex >= 0 && _currentTouchPageIndex < TouchButtonPages?.Count
-                ? TouchButtonPages[_currentTouchPageIndex] : null;
+        CurrentTouchPageIndex >= 0 && CurrentTouchPageIndex < TouchButtonPages?.Count
+                ? TouchButtonPages[CurrentTouchPageIndex] : null;
 
     /// <summary>"current / total" label for the touch pager (1-based).</summary>
     [JsonIgnore]
-    public string TouchPageLabel =>
-        TouchButtonPages is { Count: > 0 }
-            ? $"{Math.Clamp(_currentTouchPageIndex + 1, 1, TouchButtonPages.Count)} / {TouchButtonPages.Count}"
-            : "0 / 0";
+    public string TouchPageLabel => FormatLabel(TouchButtonPages, CurrentTouchPageIndex);
 
-    public int Brightness
-    {
-        get => _brightness;
-        set
-        {
-            if (_brightness == value) return;
-            _brightness = value;
-            OnPropertyChanged();
-        }
-    }
+    [ObservableProperty]
+    public partial int Brightness { get; set; } = 100;
 
     // Briefly draws the page name on touch button 0 after switching pages.
     // Opt-in: many users find the 2s overlay distracting and prefer to keep
     // their layout visible.
-    private bool _showPageNameOverlayEnabled;
-    public bool ShowPageNameOverlayEnabled
-    {
-        get => _showPageNameOverlayEnabled;
-        set { if (_showPageNameOverlayEnabled == value) return; _showPageNameOverlayEnabled = value; OnPropertyChanged(); }
-    }
+    [ObservableProperty]
+    public partial bool ShowPageNameOverlayEnabled { get; set; }
 
-    private bool _hapticEnabled;
-    public bool HapticEnabled
-    {
-        get => _hapticEnabled;
-        set
-        {
-            if (_hapticEnabled == value) return;
-            _hapticEnabled = value;
-            OnPropertyChanged();
-        }
-    }
+    [ObservableProperty]
+    public partial bool HapticEnabled { get; set; }
 
     /// <summary>
     /// Ids of plugins the user has enabled. The v2→v3 migration seeds this from
@@ -370,12 +262,8 @@ public class LoupedeckConfig : INotifyPropertyChanged
 
     // --- App-focus page switching (Feature 2) ---------------------------------
     // Master toggle for the foreground-window → page mapping.
-    private bool _appSwitchingEnabled;
-    public bool AppSwitchingEnabled
-    {
-        get => _appSwitchingEnabled;
-        set { if (_appSwitchingEnabled == value) return; _appSwitchingEnabled = value; OnPropertyChanged(); }
-    }
+    [ObservableProperty]
+    public partial bool AppSwitchingEnabled { get; set; }
 
     // Ordered rule list — first match wins. ObjectCreationHandling.Replace for the
     // same reason as HapticSteps (avoid Newtonsoft appending to the default instance).
@@ -385,10 +273,9 @@ public class LoupedeckConfig : INotifyPropertyChanged
     // Touch page to switch to when no rule matches. null = do nothing on no-match.
     public int? AppSwitchingFallbackTouchPageIndex { get; set; }
 
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
+    private static string FormatLabel(System.Collections.ICollection? pagesCount, int index) => FormatLabel(pagesCount?.Count, index);
+    private static string FormatLabel(int? pagesCount, int index) =>
+        pagesCount is > 0
+            ? $"{Math.Clamp(index + 1, 1, pagesCount.Value)} / {pagesCount.Value}"
+            : "0 / 0";
 }
