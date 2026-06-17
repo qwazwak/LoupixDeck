@@ -313,11 +313,8 @@ public class LoupedeckConfig : INotifyPropertyChanged
 
     [JsonIgnore]
     public TouchButtonPage CurrentTouchButtonPage =>
-        (TouchButtonPages != null &&
-         _currentTouchPageIndex >= 0 &&
-         _currentTouchPageIndex < TouchButtonPages.Count)
-            ? TouchButtonPages[_currentTouchPageIndex]
-            : null;
+        _currentTouchPageIndex >= 0 && _currentTouchPageIndex < TouchButtonPages?.Count
+                ? TouchButtonPages[_currentTouchPageIndex] : null;
 
     /// <summary>"current / total" label for the touch pager (1-based).</summary>
     [JsonIgnore]

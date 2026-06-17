@@ -45,7 +45,7 @@ if (opts is null) return 0; // --help printed
 
 string repoRoot = FindRepoRoot();
 string toolDir = Path.Combine(repoRoot, "tools", "BodyTextureBaker");
-string assetsDir = Path.Combine(repoRoot, "Assets");
+string assetsDir = Path.Combine(repoRoot, "LoupixDeck", "Assets");
 
 // --- Per-variant defaults. The lighting stops below are shared; each variant
 //     scales the vignette/sheen, sets its own base brightness + shadow fill, and
@@ -211,15 +211,21 @@ static int Bake(Variant variant, string input, string output, int W, double dark
 
     // --- Assemble the SVG: outer drop shadow + baked image clipped to the rounded body. ---
     string head =
-        $"<svg viewBox=\"0 0 {ViewBoxW} {ViewBoxH}\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">" +
-        "<defs>" +
-        "<filter id=\"bodyShadow\" x=\"-25%\" y=\"-25%\" width=\"150%\" height=\"160%\">" +
-        "<feDropShadow dx=\"0\" dy=\"8\" stdDeviation=\"14\" flood-color=\"#000000\" flood-opacity=\"0.45\"/></filter>" +
-        $"<clipPath id=\"bodyClip\"><rect x=\"{BodyX}\" y=\"{BodyY}\" width=\"{BodyW}\" height=\"{BodyH}\" rx=\"{BodyR}\" ry=\"{BodyR}\"/></clipPath>" +
-        "</defs>" +
-        $"<g filter=\"url(#bodyShadow)\"><rect x=\"{BodyX}\" y=\"{BodyY}\" width=\"{BodyW}\" height=\"{BodyH}\" rx=\"{BodyR}\" ry=\"{BodyR}\" fill=\"{variant.BodyFill}\"/></g>" +
-        "<g clip-path=\"url(#bodyClip)\">" +
-        $"<image x=\"{BodyX}\" y=\"{BodyY}\" width=\"{BodyW}\" height=\"{BodyH}\" preserveAspectRatio=\"none\" xlink:href=\"data:image/png;base64,";
+        $"""
+        <svg viewBox="0 0 {ViewBoxW} {ViewBoxH}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <defs>
+            <filter id="bodyShadow" x="-25%" y="-25%" width="150%" height="160%">
+                <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#000000" flood-opacity="0.45"/>
+            </filter>
+            <clipPath id="bodyClip">
+                <rect x="{BodyX}" y="{BodyY}" width="{BodyW}" height="{BodyH}" rx="{BodyR}" ry="{BodyR}"/>
+            </clipPath>
+        </defs>
+        <g filter="url(#bodyShadow)">
+            <rect x="{BodyX}" y="{BodyY}" width="{BodyW}" height="{BodyH}" rx="{BodyR}" ry="{BodyR}" fill="{variant.BodyFill}"/>
+        </g>
+        <g clip-path="url(#bodyClip)"><image x="{BodyX}" y="{BodyY}" width="{BodyW}" height="{BodyH}" preserveAspectRatio="none" xlink:href="data:image/png;base64,
+        """;
     string tail = "\"/></g></svg>";
     File.WriteAllText(output, head + b64 + tail, new UTF8Encoding(false));
 
@@ -256,7 +262,7 @@ static string FindRepoRoot()
         var dir = new DirectoryInfo(start);
         while (dir is not null)
         {
-            if (File.Exists(Path.Combine(dir.FullName, "LoupixDeck.csproj")))
+            if (File.Exists(Path.Combine(dir.FullName, "LoupixDeck.slnx")))
                 return dir.FullName;
             dir = dir.Parent;
         }

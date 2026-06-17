@@ -7,7 +7,7 @@ using System.Management;
 using System.Text.RegularExpressions;
 #endif
 
-public static class SerialDeviceHelper
+public static partial class SerialDeviceHelper
 {
     // NormalizedSerial is the platform-uniform identity value (Windows hex→ASCII
     // decoded, '&'-synthesized location ids → null); Serial keeps the raw value
@@ -24,6 +24,14 @@ public static class SerialDeviceHelper
     );
 
 #if WINDOWS
+    const string regexCulture = "en-US"; // Use a culture with ASCII digits 0-9 to avoid surprises in other locales
+    [GeneratedRegex(@"VID_([0-9A-F]{4})", RegexOptions.IgnoreCase, regexCulture)]
+    private static partial Regex regexVid { get; }
+    [GeneratedRegex(@"PID_([0-9A-F]{4})", RegexOptions.IgnoreCase, regexCulture)]
+    private static partial Regex regexPid { get; }
+    [GeneratedRegex(@"\(COM(\d+)\)", RegexOptions.IgnoreCase, regexCulture)]
+    private static partial Regex regexCom { get; }
+
     // SuppressMessage rather than [SupportedOSPlatform] — the latter cascades to
     // every caller and forces platform attributes on otherwise cross-platform
     // code (the Linux #else branch implements the same API). The WMI call is
@@ -33,9 +41,6 @@ public static class SerialDeviceHelper
     public static List<SerialDeviceInfo> ListSerialUsbDevices()
     {
         var result = new List<SerialDeviceInfo>();
-        var regexVid = new Regex(@"VID_([0-9A-F]{4})", RegexOptions.IgnoreCase);
-        var regexPid = new Regex(@"PID_([0-9A-F]{4})", RegexOptions.IgnoreCase);
-        var regexCom = new Regex(@"\(COM(\d+)\)", RegexOptions.IgnoreCase);
 
         using var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_PnPEntity WHERE Name LIKE '%(COM%'");
 
