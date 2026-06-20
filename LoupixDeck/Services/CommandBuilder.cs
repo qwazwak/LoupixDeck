@@ -41,7 +41,7 @@ public class CommandBuilder : ICommandBuilder
                 }
                 else
                 {
-                    if (menuEntry.Parameters != null && menuEntry.Parameters.Any())
+                    if (menuEntry.Parameters != null && menuEntry.Parameters.Count != 0)
                     {
                         var menuParameter = menuEntry.Parameters.First();
                         parameters.Add(menuParameter.Key, menuParameter.Value);
@@ -71,9 +71,7 @@ public class CommandBuilder : ICommandBuilder
         foreach (var param in commandInfo.Parameters)
         {
             var placeholder = "{" + param.Name + "}";
-            var replacement = parameterValues.TryGetValue(param.Name, out var value)
-                ? value?.ToString() ?? "null"
-                : "null";
+            var replacement = parameterValues.GetValueOrDefault(param.Name)?.ToString() ?? "null";
             templateSb.Replace(placeholder, replacement);
         }
 

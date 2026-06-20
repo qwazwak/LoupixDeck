@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace LoupixDeck.Native;
 
-public static partial class User32
+internal static partial class User32
 {
     public static partial class SystemMetrics
     {

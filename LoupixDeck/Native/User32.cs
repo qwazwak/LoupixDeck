@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace LoupixDeck.Native;
 
-public static partial class User32
+internal static partial class User32
 {
     /// <summary>Retrieves the identifier of the thread that created the specified window and, optionally, the identifier of the process that created the window.</summary>
     /// <param name="hWnd">

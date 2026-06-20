@@ -19,7 +19,8 @@ namespace LoupixDeck;
 
 /// <summary>
 /// DI wiring for the issue #116 root + per-device topology.
-///
+/// </summary>
+/// <remarks>
 /// <see cref="AddRootServices"/> registers the device-agnostic singletons (OS input,
 /// config/asset IO, macro store, plugin discovery). <see cref="AddDeviceServices"/>
 /// builds one child collection per device: it forwards the root singletons in via
@@ -27,14 +28,14 @@ namespace LoupixDeck;
 /// command catalog and the plugin-host wiring — so command activation and plugin
 /// delegates resolve through THIS device's provider. Phase 1 instantiates exactly one
 /// device; Phase 2 starts N child providers.
-/// </summary>
+/// </remarks>
 public static class ServiceCollectionExtensions
 {
     /// <summary>Re-expose a root-container singleton inside a device child collection.
     /// The instance stays the single root instance; only the resolution is forwarded.</summary>
     private static void Forward<T>(this IServiceCollection collection, IServiceProvider root)
         where T : class
-        => collection.AddSingleton(_ => root.GetRequiredService<T>());
+        => collection.AddSingleton(root.GetRequiredService<T>);
 
     // ───────────────────────── Root (device-agnostic) ─────────────────────────
 
