@@ -23,7 +23,7 @@ public interface IDeviceHostRegistry
     IReadOnlyList<DeviceHost> Hosts { get; }
 
     /// <summary>The device that owns the config window (CLI/UI default target).</summary>
-    DeviceHost Primary { get; }
+    DeviceHost? Primary { get; }
 
     void Add(DeviceHost host);
 
@@ -35,7 +35,7 @@ public interface IDeviceHostRegistry
     /// its scope key (slug+serial), bare serial, or slug. Returns null when nothing
     /// matches; an ambiguous slug match (two identical units) yields the first.
     /// </summary>
-    DeviceHost Find(string selector);
+    DeviceHost? Find(string selector);
 }
 
 public sealed class DeviceHostRegistry : IDeviceHostRegistry
@@ -48,9 +48,9 @@ public sealed class DeviceHostRegistry : IDeviceHostRegistry
         get { lock (_gate) return _hosts.ToArray(); }
     }
 
-    public DeviceHost Primary
+    public DeviceHost? Primary
     {
-        get { lock (_gate) return _hosts.FirstOrDefault(h => h.IsPrimary) ?? _hosts.FirstOrDefault(); }
+        get { lock (_gate) return _hosts.Find(h => h.IsPrimary) ?? (_hosts.Count is not 0 ? _hosts[0] : null); }
     }
 
     public void Add(DeviceHost host)
@@ -65,7 +65,7 @@ public sealed class DeviceHostRegistry : IDeviceHostRegistry
         lock (_gate) _hosts.Remove(host);
     }
 
-    public DeviceHost Find(string selector)
+    public DeviceHost? Find(string selector)
     {
         if (string.IsNullOrWhiteSpace(selector)) return null;
         selector = selector.Trim();

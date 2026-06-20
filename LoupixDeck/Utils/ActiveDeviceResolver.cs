@@ -77,7 +77,7 @@ public static class ActiveDeviceResolver
 
     /// <summary>Pick which connected device owns the config window: the marker match,
     /// else the first. Returns null for an empty list.</summary>
-    public static ResolvedDevice PickPrimary(IReadOnlyList<ResolvedDevice> devices)
+    public static ResolvedDevice? PickPrimary(IReadOnlyList<ResolvedDevice> devices)
     {
         if (devices == null || devices.Count == 0) return null;
         var marker = ReadMarker();
@@ -100,7 +100,7 @@ public static class ActiveDeviceResolver
         catch (Exception ex) { Console.WriteLine($"Legacy config migration failed: {ex.Message}"); }
     }
 
-    private static ResolvedDevice ResolveCore()
+    private static ResolvedDevice? ResolveCore()
     {
         // 1a. Legacy config.json — migrate to Live S's per-device (slug-only) path.
         MigrateLegacyConfigJson();
@@ -162,7 +162,7 @@ public static class ActiveDeviceResolver
         return device;
     }
 
-    private static bool MarkerMatches(ResolvedDevice d, string marker)
+    private static bool MarkerMatches(ResolvedDevice d, string? marker)
     {
         if (string.IsNullOrEmpty(marker)) return false;
         // Back-compat: an old marker holds the bare slug; a new one holds the scope key.
@@ -234,7 +234,7 @@ public static class ActiveDeviceResolver
         return result;
     }
 
-    private static string ReadMarker()
+    private static string? ReadMarker()
     {
         try
         {

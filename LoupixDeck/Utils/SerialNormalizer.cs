@@ -24,7 +24,7 @@ public static class SerialNormalizer
     /// '&amp;') or is empty. Hex-encoded ASCII is decoded; anything else is returned
     /// unchanged.
     /// </summary>
-    public static string NormalizeWindowsPnpSegment(string segment)
+    public static string? NormalizeWindowsPnpSegment(string segment)
     {
         if (string.IsNullOrWhiteSpace(segment)) return null;
         segment = segment.Trim();
@@ -41,7 +41,7 @@ public static class SerialNormalizer
     /// the result is lowercased and length-capped. Returns null for empty input —
     /// never let a raw serial reach a path.
     /// </summary>
-    public static string ForFilename(string serial)
+    public static string? ForFilename(string serial)
     {
         if (string.IsNullOrWhiteSpace(serial)) return null;
 
@@ -73,7 +73,7 @@ public static class SerialNormalizer
         return sb.Length == 0 ? null : sb.ToString();
     }
 
-    private static string TryDecodeHexAscii(string s)
+    private static string? TryDecodeHexAscii(string s)
     {
         if (s.Length < 2 || s.Length % 2 != 0) return null;
         foreach (var c in s)

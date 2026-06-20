@@ -64,7 +64,7 @@ public partial class TouchButtonSettings : Window
     // moves past the threshold (so a click/double-click is not swallowed). We use the
     // same pointer-capture approach as the card reorder rather than the OS drag loop,
     // which keeps double-click-to-append working.
-    private MenuEntry _treeDragCandidate;
+    private MenuEntry? _treeDragCandidate;
     private Point _treeDragStart;
     private bool _treeDragging;
 
@@ -401,7 +401,7 @@ public partial class TouchButtonSettings : Window
     private void SystemCommandsTree_PointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
         => EndTreeDrag(null);
 
-    private void EndTreeDrag(IPointer pointer)
+    private void EndTreeDrag(IPointer? pointer)
     {
         _treeDragCandidate = null;
         _treeDragging = false;
@@ -414,7 +414,7 @@ public partial class TouchButtonSettings : Window
 
     /// <summary>Resolves the <see cref="CommandSequenceSlot"/> that owns a chip control
     /// by walking up to its <see cref="ItemsControl"/>.</summary>
-    private static CommandSequenceSlot ResolveSlot(Control control)
+    private static CommandSequenceSlot? ResolveSlot(Control control)
         => control.FindAncestorOfType<ItemsControl>()?.DataContext as CommandSequenceSlot;
 
     /// <summary>The realized sequence strips: each slot's chip list paired with the
@@ -929,7 +929,7 @@ public partial class TouchButtonSettings : Window
     /// Topmost-first hit test against the on-canvas bounds of every layer.
     /// Returns null if the pointer is over empty canvas.
     /// </summary>
-    private static LayerBase HitTestLayer(TouchButtonSettingsViewModel vm, Point pos)
+    private static LayerBase? HitTestLayer(TouchButtonSettingsViewModel vm, Point pos)
     {
         if (vm.ButtonData?.Layers == null) return null;
 

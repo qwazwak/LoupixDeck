@@ -18,15 +18,15 @@ public partial class RotaryButtonSettings : Window
 
     // ───────── Chip-reorder drag state ─────────
 
-    private CommandSegment _draggedSegment;
-    private ItemsControl _dragList;
-    private CommandSequenceSlot _dragSlot;
+    private CommandSegment? _draggedSegment;
+    private ItemsControl? _dragList;
+    private CommandSequenceSlot? _dragSlot;
     private Point _segmentDragStart;
     private bool _segmentDragging;
 
     // ───────── Tree drag-to-insert state ─────────
 
-    private MenuEntry _treeDragCandidate;
+    private MenuEntry? _treeDragCandidate;
     private Point _treeDragStart;
     private bool _treeDragging;
 
@@ -317,7 +317,7 @@ public partial class RotaryButtonSettings : Window
 
     // ───────── Drag ghost ─────────
 
-    private void ShowDragGhost(string label)
+    private void ShowDragGhost(string? label)
     {
         DragGhostText.Text = label ?? string.Empty;
         DragGhostLayer.IsVisible = true;
@@ -379,7 +379,7 @@ public partial class RotaryButtonSettings : Window
 
     /// <summary>Resolves the <see cref="CommandSequenceSlot"/> that owns a chip control
     /// by walking up to its <see cref="ItemsControl"/>.</summary>
-    private static CommandSequenceSlot ResolveSlot(Control control)
+    private static CommandSequenceSlot? ResolveSlot(Control control)
         => control.FindAncestorOfType<ItemsControl>()?.DataContext as CommandSequenceSlot;
 
     /// <summary>The strip whose drop zone currently contains the pointer, or null.</summary>

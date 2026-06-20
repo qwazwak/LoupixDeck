@@ -8,6 +8,4 @@ public interface IDialogViewModel
     TaskCompletionSource<DialogResult> DialogResult { get; }
 }
 
-public class ViewModelBase : ObservableObject
-{
-}
+public class ViewModelBase : ObservableObject;

@@ -6,7 +6,7 @@ namespace LoupixDeck.Utils;
 
 public static class WindowHelper
 {
-    public static Window GetMainWindow()
+    public static Window? GetMainWindow()
     {
         return Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
             ? desktop.MainWindow

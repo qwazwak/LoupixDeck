@@ -15,7 +15,7 @@ public interface IMacroManager
     void Load();
 
     /// <summary>Case-insensitive lookup by macro name; null when not found.</summary>
-    Macro Get(string name);
+    Macro? Get(string name);
 
     /// <summary>Replaces the whole macro set (editor save) and persists it.</summary>
     void ReplaceAll(IEnumerable<Macro> macros);
@@ -28,7 +28,7 @@ public interface IMacroManager
     /// command-parser characters ( ) , &amp; and unique among all macros except
     /// <paramref name="ignore"/>.
     /// </summary>
-    bool IsNameValid(string name, Macro ignore = null);
+    bool IsNameValid(string name, Macro? ignore = null);
 
     /// <summary>Raised after the macro set changed (editor save).</summary>
     event EventHandler MacrosChanged;

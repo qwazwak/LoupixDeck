@@ -23,7 +23,7 @@ public partial class MainWindow : Window
 
     private static MainWindow Instance { get; set; }
 
-    public MainShellViewModel ViewModel => DataContext as MainShellViewModel;
+    public MainShellViewModel? ViewModel => DataContext as MainShellViewModel;
 
     private MainShellViewModel _shell;
 

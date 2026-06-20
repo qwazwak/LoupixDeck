@@ -43,7 +43,7 @@ public class CommandRunner : ICommandRunner
 
     public void ExecuteCommand(string command)
     {
-        Process process = null;
+        Process? process = null;
         try
         {
             var psi = new ProcessStartInfo

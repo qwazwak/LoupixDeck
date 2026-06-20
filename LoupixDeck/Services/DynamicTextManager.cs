@@ -358,7 +358,7 @@ public sealed class DynamicTextManager : IDynamicTextManager, IDisposable
     /// The owner key the button's currently bound command would produce, or <c>null</c> when
     /// the button is not bound to a registered text/image display command.
     /// </summary>
-    private string ResolveDisplayKey(TouchButton button)
+    private string? ResolveDisplayKey(TouchButton button)
     {
         if (button == null || string.IsNullOrWhiteSpace(button.Command))
             return null;

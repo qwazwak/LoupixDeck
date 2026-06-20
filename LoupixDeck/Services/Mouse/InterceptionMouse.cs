@@ -26,20 +26,6 @@ public class InterceptionMouse() : InterceptionBase(Native.InterceptionContext.M
     // One wheel detent, same unit as Win32 WHEEL_DELTA.
     private const short WheelDelta = 120;
 
-    // Send() gives up when the driver accepts no strokes for this long (see InterceptionKeyboard).
-    private const int MaxStallMs = 500;
-
-    // How long to wait for win32k to reflect an injected button stroke in the async key state.
-    private const int StrokeAckTimeoutMs = 25;
-
-    // After this many consecutive ack timeouts, button verification is considered unreliable
-    // and injection falls back to fixed pacing.
-    private const int MaxConsecutiveAckFailures = 3;
-
-    // Pacing used for strokes that cannot be verified (moves, wheel) or when verification
-    // became unreliable. Spin-based for sub-millisecond accuracy.
-    private const double FallbackPaceMs = 2.0;
-
     // Virtual-key codes of the physical mouse buttons (GetAsyncKeyState reports physical
     // buttons, matching the driver-level strokes we inject — button swap happens above us).
     private const int VkLButton = 0x01;
@@ -164,7 +150,7 @@ public class InterceptionMouse() : InterceptionBase(Native.InterceptionContext.M
             }
         };
 
-        if (_ackFailures >= MaxConsecutiveAckFailures)
+        if (_ackFailures >= ConfigConstants.MaxConsecutiveAckFailures)
         {
             InjectWithDelay(value);
             return;
@@ -182,7 +168,7 @@ public class InterceptionMouse() : InterceptionBase(Native.InterceptionContext.M
             // resending would duplicate the click.
             _ackFailures++;
             Console.Error.WriteLine(
-                $"[InterceptionMouse] Button stroke 0x{state:X3} not acknowledged within {StrokeAckTimeoutMs} ms.");
+                $"[InterceptionMouse] Button stroke 0x{state:X3} not acknowledged within {ConfigConstants.StrokeAckTimeoutMs} ms.");
         }
     }
 

@@ -7,7 +7,7 @@ namespace LoupixDeck.Services.Commands;
 /// </summary>
 public static class ParameterDefaults
 {
-    public static object GetDefaultValue(Type type)
+    public static object? GetDefaultValue(Type type)
     {
         if (type == null)
             throw new ArgumentNullException(nameof(type));
@@ -33,15 +33,15 @@ public static class ParameterDefaults
         {
             var values = Enum.GetValues(type);
             return values.Length > 0
-                ? values.GetValue(0)
-                : Activator.CreateInstance(type);
+                ? values.GetValue(0)!
+                : Activator.CreateInstance(type)!;
         }
 
         if (Nullable.GetUnderlyingType(type) != null)
             return null;
 
         if (type.IsValueType)
-            return Activator.CreateInstance(type);
+            return Activator.CreateInstance(type)!;
 
         return null;
     }

@@ -22,7 +22,7 @@ public sealed class FolderEntry
 
 public sealed class RotaryOverride
 {
-    public Func<Task> OnLeft { get; init; }
-    public Func<Task> OnRight { get; init; }
-    public Func<Task> OnPress { get; init; }
+    public Func<Task>? OnLeft { get; init; }
+    public Func<Task>? OnRight { get; init; }
+    public Func<Task>? OnPress { get; init; }
 }

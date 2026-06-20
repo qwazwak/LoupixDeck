@@ -1,4 +1,5 @@
 #if WINDOWS
+using LoupixDeck.Native;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -38,15 +39,6 @@ public sealed class WindowsActiveWindowMonitor : IActiveWindowMonitor, IDisposab
     [DllImport("user32.dll")]
     private static extern bool UnhookWinEvent(IntPtr hWinEventHook);
 
-    [DllImport("user32.dll")]
-    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
-
-    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
-    private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
-
-    [DllImport("user32.dll")]
-    private static extern int GetWindowTextLength(IntPtr hWnd);
-
     public void StartMonitoring()
     {
         if (_started) return;
@@ -66,8 +58,8 @@ public sealed class WindowsActiveWindowMonitor : IActiveWindowMonitor, IDisposab
             // Only the window object itself (not a child control / caret), and a real handle.
             if (hwnd == IntPtr.Zero || idObject != 0 || idChild != 0) return;
 
-            var processName = ResolveProcessName(hwnd);
-            var title = ResolveTitle(hwnd);
+            var processName = User32.GetWindowThreadProcessName(hwnd);
+            var title = User32.GetWindowText(hwnd);
 
             if (_last.Process == processName && _last.Title == title) return;
             _last = (processName, title);
@@ -82,31 +74,6 @@ public sealed class WindowsActiveWindowMonitor : IActiveWindowMonitor, IDisposab
         {
             /* ignore — never crash the native hook */
         }
-    }
-
-    private static string ResolveProcessName(IntPtr hwnd)
-    {
-        try
-        {
-            GetWindowThreadProcessId(hwnd, out var pid);
-            if (pid == 0) return null;
-            using var process = Process.GetProcessById((int)pid);
-            return process.ProcessName; // already without path or ".exe"
-        }
-        catch
-        {
-            // Protected / exited process, or pid no longer valid.
-            return null;
-        }
-    }
-
-    private static string ResolveTitle(IntPtr hwnd)
-    {
-        var length = GetWindowTextLength(hwnd);
-        if (length <= 0) return string.Empty;
-        var sb = new StringBuilder(length + 1);
-        GetWindowText(hwnd, sb, sb.Capacity);
-        return sb.ToString();
     }
 
     public void Dispose()

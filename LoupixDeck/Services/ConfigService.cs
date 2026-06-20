@@ -9,7 +9,7 @@ namespace LoupixDeck.Services;
 
 public interface IConfigService
 {
-    T LoadConfig<T>(string filePath) where T : class;
+    T? LoadConfig<T>(string filePath) where T : class;
     void SaveConfig(object config, string filePath);
 }
 
@@ -51,7 +51,7 @@ public class ConfigService : IConfigService
         FromFuture
     }
 
-    public T LoadConfig<T>(string filePath) where T : class
+    public T? LoadConfig<T>(string filePath) where T : class
     {
         try
         {
@@ -113,7 +113,7 @@ public class ConfigService : IConfigService
     /// Returns null when the file must be discarded (backed up) and a fresh
     /// config created. Parse errors propagate to the caller's corruption handler.
     /// </summary>
-    private T LoadVersionedConfig<T>(string json, string filePath) where T : class
+    private T? LoadVersionedConfig<T>(string json, string filePath) where T : class
     {
         var root = JObject.Parse(json);
 
@@ -174,13 +174,13 @@ public class ConfigService : IConfigService
     /// current version. Returns null when a required migration step is missing
     /// or fails to advance the version.
     /// </summary>
-    private JObject MigrateIfNeeded(JObject root, string filePath)
+    private JObject? MigrateIfNeeded(JObject root, string filePath)
     {
         var version = GetVersion(root);
 
         while (version < LoupedeckConfig.CurrentVersion)
         {
-            var migration = _migrations.FirstOrDefault(m => m.FromVersion == version);
+            var migration = _migrations.Find(m => m.FromVersion == version);
             if (migration == null)
             {
                 Console.WriteLine($"No migration registered from config version {version}.");

@@ -128,9 +128,7 @@ public interface ISideStripSession : IDisposable
 /// audio dial); segments the provider declines fall back to the default dial label. The session
 /// the provider returns must also implement <see cref="ISegmentStripSession"/>.
 /// </summary>
-public interface ISegmentStripProvider : ISideStripProvider
-{
-}
+public interface ISegmentStripProvider : ISideStripProvider;
 
 /// <summary>
 /// Per-segment rendering capability, implemented by the session of an

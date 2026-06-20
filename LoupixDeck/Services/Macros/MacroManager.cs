@@ -78,7 +78,7 @@ public class MacroManager : IMacroManager
         }
     }
 
-    public Macro Get(string name)
+    public Macro? Get(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
             return null;

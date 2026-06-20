@@ -9,6 +9,7 @@ using LoupixDeck.Services.Plugins;
 using LoupixDeck.Utils;
 using LoupixDeck.ViewModels;
 using LoupixDeck.ViewModels.Base;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LoupixDeck.Views;
 
@@ -308,7 +309,7 @@ public partial class Settings : Window
     }
 
     /// <summary>Builds the "by {Author} • v{Version}" subtitle from whatever fields exist.</summary>
-    private static string BuildSubtitle(PluginManifest manifest)
+    private static string? BuildSubtitle(PluginManifest? manifest)
     {
         if (manifest == null)
             return null;
