@@ -1,18 +1,21 @@
 namespace LoupixDeck.PluginSdk;
 
 /// <summary>
+/// <para>
 /// A plugin command that represents a rotary-encoder value adjustment: a
 /// continuous parameter the user dials up/down (volume, brightness, zoom),
 /// with a press to reset or commit. Set
 /// <see cref="IPluginCommand.SupportedTargets"/> to
 /// <see cref="ButtonTargets.RotaryEncoder"/>.
-///
+/// </para>
+/// <para>
 /// Host-side dispatch for this interface is added alongside the first plugin
 /// that needs it; until then plugins should expose three discrete commands
 /// (e.g. <c>Foo.Up</c>, <c>Foo.Down</c>, <c>Foo.Reset</c>) bound to the
 /// rotary's left/right/press slots, and use <see cref="IPluginCommand.Execute"/>
 /// branching on <see cref="CommandContext.Target"/> to route them. Implementing
 /// <see cref="IAdjustmentCommand"/> in addition is forward-compatible.
+/// </para>
 /// </summary>
 public interface IAdjustmentCommand : IPluginCommand
 {

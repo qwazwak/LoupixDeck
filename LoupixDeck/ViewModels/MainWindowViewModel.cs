@@ -45,7 +45,6 @@ public partial class MainWindowViewModel : ViewModelBase
     /// <remarks>No-op unless that side is in FreeDraw mode.</remarks>
     public IAsyncRelayCommand<RotarySide> EditStripCanvasCommand => Relay.Create(ref field, EditStripCanvas_Click);
 
-
     public IRelayCommand AddTouchPageCommand => Relay.Create(ref field, AddTouchPageButton_Click);
     public IRelayCommand DeleteTouchPageCommand => Relay.Create(ref field, DeleteTouchPageButton_Click);
     public IRelayCommand<int> TouchPageButtonCommand => Relay.Create(ref field, TouchPageButton_Click);
@@ -91,7 +90,6 @@ public partial class MainWindowViewModel : ViewModelBase
     /// </summary>
     [ObservableProperty]
     public partial bool IsExclusiveModeActive { get; private set; }
-
 
     /// <summary>Title of the active exclusive-mode provider, shown in the overlay.</summary>
     [ObservableProperty]

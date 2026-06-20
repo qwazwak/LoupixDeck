@@ -5,14 +5,17 @@ using SkiaSharp;
 namespace LoupixDeck.Models.Layers;
 
 /// <summary>
+/// <para>
 /// A plugin-owned layer whose pixels are rendered by a plugin and pushed to the host at
 /// runtime (via an <c>IDisplayImageCommand</c>), rather than loaded from an asset like
 /// <see cref="ImageLayer"/>. The host only blits <see cref="RenderedBitmap"/> (with the
 /// same fit/scale/position math as an image layer).
-///
+/// </para>
+/// <para>
 /// This layer kind can only be created by the dynamic-text manager (never via the editor's
 /// add buttons). It is plugin-managed (see <see cref="LayerBase.OwnerKey"/>): the user may
 /// move/scale/rotate/hide/reorder it, but not edit its content or delete it directly.
+/// </para>
 /// </summary>
 public class PluginLayer : LayerBase
 {

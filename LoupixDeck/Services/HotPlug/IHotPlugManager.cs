@@ -3,13 +3,16 @@ using LoupixDeck.Registry;
 namespace LoupixDeck.Services.HotPlug;
 
 /// <summary>
+/// <para>
 /// Watches for USB device changes at runtime and reconciles them against the
 /// running <see cref="IDeviceHostRegistry"/> (issue #116 phase 3b). It owns the
 /// diff but not the bring-up: building a device's child provider + view model is
 /// App-level work, so it raises events that App handles on the UI thread.
-///
+/// </para>
+/// <para>
 /// Both events fire on a background (debounce-timer) thread — handlers must
 /// marshal to the UI thread before touching view models / the device.
+/// </para>
 /// </summary>
 public interface IHotPlugManager
 {

@@ -39,12 +39,14 @@ internal sealed class NoOpDeviceWatcher : IDeviceWatcher
 
 #if WINDOWS
 /// <summary>
+/// <para>
 /// Windows hot-plug via WMI. We subscribe to the <b>extrinsic</b>
 /// <c>Win32_DeviceChangeEvent</c> with an <c>EventType = 2 OR EventType = 3</c>
 /// (device arrival / removal) filter. This is a true push event backed by
 /// WM_DEVICECHANGE — WMI is only woken when the device topology actually changes,
 /// so it costs ~0 % CPU while idle.
-///
+/// </para>
+/// <para>
 /// We deliberately do <i>not</i> use the intrinsic <c>__InstanceCreationEvent</c> /
 /// <c>__InstanceDeletionEvent ... WITHIN n</c> pattern over <c>Win32_PnPEntity</c>:
 /// intrinsic events are implemented by WMI re-enumerating and diffing the whole
@@ -53,6 +55,7 @@ internal sealed class NoOpDeviceWatcher : IDeviceWatcher
 /// but that's fine — the event only signals "rescan"; <see cref="HotPlugManager"/>
 /// does the diff (and self-re-arms to confirm a removal), so a USB-CDC serial port
 /// that arrives/leaves as part of a composite device is still picked up by the rescan.
+/// </para>
 /// </summary>
 // SuppressMessage mirrors SerialDeviceHelper: the WMI types are
 // [SupportedOSPlatform("windows")] but this whole class is gated behind the

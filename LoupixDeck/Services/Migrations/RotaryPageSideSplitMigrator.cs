@@ -3,15 +3,18 @@ using Newtonsoft.Json.Linq;
 namespace LoupixDeck.Services.Migrations;
 
 /// <summary>
+/// <para>
 /// Config migration v3 → v4: splits the single <c>RotaryButtonPages</c> list into
 /// independent <c>LeftRotaryButtonPages</c> / <c>RightRotaryButtonPages</c> sets so
 /// devices with side strips (Razer Stream Controller) can page each dial column on
 /// its own.
-///
+/// </para>
+/// <para>
 /// Only Razer configs (6 knobs, 3 per side) are split: each original page becomes a
 /// left page (knobs 0–2) and a right page (knobs 3–5, re-indexed 0–2), with the
 /// command wraps copied to both sides. Devices without side strips (Live S) keep
 /// their single <c>RotaryButtonPages</c> list untouched — only the version bumps.
+/// </para>
 /// </summary>
 public sealed class RotaryPageSideSplitMigrator : IConfigMigration
 {

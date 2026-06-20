@@ -9,6 +9,7 @@ using SkiaSharp;
 namespace LoupixDeck.Controllers;
 
 /// <summary>
+/// <para>
 /// Finger-following swipe animation for the Razer side strips (segmented / free-draw
 /// pages). The device streams the finger position during a drag as a run of TOUCH
 /// packets; this part of the controller turns that stream into a vertical slide where
@@ -17,12 +18,14 @@ namespace LoupixDeck.Controllers;
 /// glides back). Plugin-override strips are excluded — they own their own pixels and
 /// gestures. Falls back to a clean release-time slide when the device sends no
 /// intermediate packets, since the commit offset is derived from start/end anyway.
-///
+/// </para>
+/// <para>
 /// Bitmap lifetime: the three cached page bitmaps are disposed only while holding the
 /// per-side redraw gate (via <see cref="_stripDisposeQueue"/>), and a cached reference
 /// is always replaced with the fresh bitmap before the old one is queued. That keeps a
 /// concurrent gated render from ever reading a just-disposed SKBitmap — see the
 /// access-violation history around Skia object disposal.
+/// </para>
 /// </summary>
 public partial class LoupedeckLiveSController
 {

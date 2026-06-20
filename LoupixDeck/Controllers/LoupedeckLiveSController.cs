@@ -13,14 +13,17 @@ using LoupixDeck.Utils;
 namespace LoupixDeck.Controllers;
 
 /// <summary>
+/// <para>
 /// Device-agnostic controller orchestrating the services:
 /// - loads/saves the per-device configuration,
 /// - starts the device (concrete type chosen via <see cref="DeviceRegistry"/>),
 /// - registers device events,
 /// - forwards UI events to the corresponding services.
-///
+/// </para>
+/// <para>
 /// The class name is kept for source-history continuity (originally Live-S-only);
 /// it now handles any device exposed via <see cref="IDeviceService"/>.
+/// </para>
 /// </summary>
 public partial class LoupedeckLiveSController(
     IDeviceService deviceService,

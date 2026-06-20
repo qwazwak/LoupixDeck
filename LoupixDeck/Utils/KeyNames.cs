@@ -8,12 +8,15 @@ namespace LoupixDeck.Utils;
 /// macros to the platform-specific codes the keyboard backends expect.
 /// </summary>
 /// <remarks>
+/// <para>
 /// - Linux: Linux input-event (evdev) key codes, written to /dev/uinput.
 /// - Windows: virtual-key codes (VK_*) plus an "extended key" flag, sent via SendInput.
 /// - Interception: PS/2 set-1 scan codes plus an "E0 extended" flag, sent via interception.dll.
-///
+/// </para>
+/// <para>
 /// Names are matched case-insensitively and a few common aliases are accepted
 /// ("Control"->Ctrl, "Escape"->Esc, "Windows"/"Super"->Win, ...).
+/// </para>
 /// </remarks>
 public static class KeyNames
 {

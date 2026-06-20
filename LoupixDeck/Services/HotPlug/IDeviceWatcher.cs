@@ -1,13 +1,14 @@
 namespace LoupixDeck.Services.HotPlug;
 
 /// <summary>
+/// <para>
 /// OS-native USB topology change notifier (issue #116 phase 3b). Raises
 /// <see cref="DevicesChanged"/> whenever a serial/USB device is added or removed;
 /// it deliberately does NOT diff — it only signals "the device set may have
 /// changed". <see cref="IHotPlugManager"/> debounces these signals and rescans to
 /// figure out exactly which device appeared or disappeared.
-///
-/// The event can fire on an arbitrary background thread.
+/// </para>
+/// <para>The event can fire on an arbitrary background thread.</para>
 /// </summary>
 public interface IDeviceWatcher : IDisposable
 {

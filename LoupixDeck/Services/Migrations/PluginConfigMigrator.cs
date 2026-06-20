@@ -3,16 +3,18 @@ using Newtonsoft.Json.Linq;
 namespace LoupixDeck.Services.Migrations;
 
 /// <summary>
-/// Config migration v2 → v3: introduced when the integrations became plugins.
-///
+/// <para>Config migration v2 → v3: introduced when the integrations became plugins.</para>
+/// <para>
 /// It seeds the <c>EnabledPlugins</c> id list so the user's previous setup is
 /// preserved: integrations that had a master switch (Elgato, Argus, HWiNFO) are
 /// enabled only when their flag was on; integrations that were always active
 /// (OBS, CoolerControl, Windows audio) are enabled unconditionally.
-///
+/// </para>
+/// <para>
 /// Integration-specific connection settings (OBS, Elgato, CoolerControl URL) are
 /// intentionally NOT moved here — each integration plugin migrates its own
 /// legacy config on first run, so the core never needs a plugin's settings schema.
+/// </para>
 /// </summary>
 public sealed class PluginConfigMigrator : IConfigMigration
 {

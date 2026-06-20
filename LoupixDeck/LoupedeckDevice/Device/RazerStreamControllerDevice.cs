@@ -4,14 +4,17 @@ using SkiaSharp;
 namespace LoupixDeck.LoupedeckDevice.Device;
 
 /// <summary>
+/// <para>
 /// Razer Stream Controller — re-skinned Loupedeck Live with a different layout:
 ///   3 knobs on the left (KNOB_TL/CL/BL), 3 on the right (KNOB_TR/CR/BR),
 ///   4×3 touch grid in the centre (90×90 each, indices 0–11),
 ///   2 narrow touch panels behind the knobs (60×270, indices 12 left / 13 right),
 ///   8 physical LED buttons (BUTTON0–BUTTON7) below the screen.
-///
+/// </para>
+/// <para>
 /// Same wire protocol as the Loupedeck Live; the single physical 480×270 display
 /// is rendered as left (X=0,60w) + center (X=60,360w) + right (X=420,60w) regions.
+/// </para>
 /// </summary>
 public class RazerStreamControllerDevice : LoupedeckDevice
 {

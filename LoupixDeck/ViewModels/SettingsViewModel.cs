@@ -66,8 +66,6 @@ public partial class SettingsViewModel : DialogViewModelBase<DialogResult>
         _pluginReload = pluginReload;
         _pluginManager = pluginManager;
 
-
-
         // CollectionChanged can fire from a background thread (the parameterless
         // RelayCommand runs Execute via Task.Run). Marshal the CanExecute refresh
         // back to the UI thread so Avalonia's Button.IsEnabled update is safe.

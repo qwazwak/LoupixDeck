@@ -3,13 +3,16 @@ using CommunityToolkit.Mvvm.ComponentModel;
 namespace LoupixDeck.Models;
 
 /// <summary>
+/// <para>
 /// Extra commands that get chained around a button command at execution time:
 /// PreCommands run first, then the button's own command, then PostCommands —
 /// all joined with " &amp;&amp; " into a single ExecuteCommand call. Enabled
 /// flags exist so the user can park a definition without losing the text.
-///
+/// </para>
+/// <para>
 /// Each page owns one or more of these slots (one per input type for rotary
 /// pages, one shared for touch pages).
+/// </para>
 /// </summary>
 [ObservableObject]
 public partial class CommandWrap //: INotifyPropertyChanged

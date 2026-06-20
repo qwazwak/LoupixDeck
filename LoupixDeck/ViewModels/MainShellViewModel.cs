@@ -4,13 +4,16 @@ using LoupixDeck.ViewModels.Base;
 namespace LoupixDeck.ViewModels;
 
 /// <summary>
+/// <para>
 /// Top-level shell that hosts one <see cref="MainWindowViewModel"/> per running
 /// device (issue #116 phase 3). The single MainWindow binds to this; a device
 /// tab strip selects which device's layout the DeviceLayoutHost shows, and the
 /// hamburger menu / tray target <see cref="SelectedDevice"/>.
-///
+/// </para>
+/// <para>
 /// Not a DI service — it aggregates view models built from several device child
 /// providers, so App constructs it and adds each device's VM.
+/// </para>
 /// </summary>
 public sealed class MainShellViewModel : ViewModelBase
 {

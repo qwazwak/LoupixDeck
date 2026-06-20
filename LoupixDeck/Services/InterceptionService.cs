@@ -6,12 +6,13 @@ using Newtonsoft.Json.Linq;
 namespace LoupixDeck.Services;
 
 /// <summary>
-/// Downloads, installs and uninstalls the Interception kernel driver on Windows.
-///
+/// <para>Downloads, installs and uninstalls the Interception kernel driver on Windows.</para>
+/// <para>
 /// The driver is intentionally NOT bundled with LoupixDeck: this service fetches the latest
 /// official release from GitHub, extracts the x64 interception.dll next to the executable
 /// (so <see cref="InterceptionKeyboard"/> can P/Invoke it) and runs the official command-line
 /// installer elevated. Installing/uninstalling the kernel driver requires a reboot.
+/// </para>
 /// </summary>
 public interface IInterceptionService
 {

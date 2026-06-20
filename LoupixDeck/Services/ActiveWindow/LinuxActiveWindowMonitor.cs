@@ -4,14 +4,17 @@ using System.Runtime.Versioning;
 namespace LoupixDeck.Services.ActiveWindow;
 
 /// <summary>
+/// <para>
 /// Tracks the foreground window on X11 (and XWayland-hosted apps) by spying on the
 /// root window's <c>_NET_ACTIVE_WINDOW</c> property via <c>xprop -spy</c>. Mirrors
 /// <c>LinuxSystemPowerService</c>: a long-lived subprocess whose stdout is parsed
 /// line by line, the whole loop wrapped in try/catch so a missing <c>xprop</c> or a
 /// vanished X11 connection degrades silently to a no-op instead of crashing.
-///
+/// </para>
+/// <para>
 /// Pure Wayland sessions (no DISPLAY) are not covered — there is no portable
 /// foreground-window protocol across GNOME/KDE/wlroots, so we stay a no-op there.
+/// </para>
 /// </summary>
 [SupportedOSPlatform("linux")]
 public sealed class LinuxActiveWindowMonitor : IActiveWindowMonitor, IDisposable
