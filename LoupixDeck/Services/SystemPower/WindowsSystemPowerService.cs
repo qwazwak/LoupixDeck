@@ -19,7 +19,7 @@ public sealed class WindowsSystemPowerService : ISystemPowerService, IDisposable
         SystemEvents.PowerModeChanged += OnPowerModeChanged;
     }
 
-    private void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
+    private void OnPowerModeChanged(object? sender, PowerModeChangedEventArgs e)
     {
         switch (e.Mode)
         {

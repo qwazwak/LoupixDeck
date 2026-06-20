@@ -58,7 +58,7 @@ public sealed class AppSwitchingService : IAppSwitchingService
         _monitor.StartMonitoring();
     }
 
-    private void OnActiveWindowChanged(object sender, ActiveWindowInfo info)
+    private void OnActiveWindowChanged(object? sender, ActiveWindowInfo info)
     {
         // The Windows hook fires on the UI thread already; the Linux monitor fires
         // on a background reader thread. Marshal unconditionally to be safe.
@@ -70,7 +70,7 @@ public sealed class AppSwitchingService : IAppSwitchingService
         });
     }
 
-    private void OnDebounceTick(object sender, EventArgs e)
+    private void OnDebounceTick(object? sender, EventArgs e)
     {
         _debounceTimer.Stop();
         var info = _pending;

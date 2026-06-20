@@ -1,20 +1,24 @@
+using System.Collections.Frozen;
+using System.Collections.Immutable;
+
 namespace LoupixDeck.Utils;
 
 /// <summary>
 /// Maps human-readable key names (e.g. "Ctrl", "Alt", "F4", "Up") used in key-combination
 /// macros to the platform-specific codes the keyboard backends expect.
-///
+/// </summary>
+/// <remarks>
 /// - Linux: Linux input-event (evdev) key codes, written to /dev/uinput.
 /// - Windows: virtual-key codes (VK_*) plus an "extended key" flag, sent via SendInput.
 /// - Interception: PS/2 set-1 scan codes plus an "E0 extended" flag, sent via interception.dll.
 ///
 /// Names are matched case-insensitively and a few common aliases are accepted
 /// ("Control"->Ctrl, "Escape"->Esc, "Windows"/"Super"->Win, ...).
-/// </summary>
+/// </remarks>
 public static class KeyNames
 {
     // Canonical name -> Linux evdev key code (see input-event-codes.h).
-    private static readonly Dictionary<string, int> Linux = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly FrozenDictionary<string, ushort> Linux = new Dictionary<string, ushort>(StringComparer.OrdinalIgnoreCase)
     {
         // Modifiers
         ["ctrl"] = 29,        // KEY_LEFTCTRL
@@ -59,13 +63,12 @@ public static class KeyNames
         // Digits (number row)
         ["0"] = 11, ["1"] = 2, ["2"] = 3, ["3"] = 4, ["4"] = 5, ["5"] = 6, ["6"] = 7,
         ["7"] = 8, ["8"] = 9, ["9"] = 10,
-    };
+    }.ToFrozenDictionary();
 
     // Canonical name -> Windows virtual-key code (VK_*) + extended-key flag.
     // Extended keys (right ctrl/alt, Win/Apps, navigation block, arrows) require
     // KEYEVENTF_EXTENDEDKEY when sent via SendInput.
-    private static readonly Dictionary<string, (int virtualKey, bool extended)> Windows =
-        new(StringComparer.OrdinalIgnoreCase)
+    private static readonly FrozenDictionary<string, (uint virtualKey, bool extended)> Windows = new Dictionary<string, (uint virtualKey, bool extended)>(StringComparer.OrdinalIgnoreCase)
         {
             // Modifiers
             ["ctrl"] = (0x11, false),   // VK_CONTROL
@@ -119,14 +122,14 @@ public static class KeyNames
             ["3"] = (0x33, false), ["4"] = (0x34, false), ["5"] = (0x35, false),
             ["6"] = (0x36, false), ["7"] = (0x37, false), ["8"] = (0x38, false),
             ["9"] = (0x39, false),
-        };
+        }.ToFrozenDictionary();
 
     // Canonical name -> PS/2 set-1 scan code + E0-extended flag (used by Interception).
     // Interception works at scan-code level, not virtual keys: the "make" code is sent with
     // state 0 (key down) / 1 (key up); the E0 flag adds 2 to the state for extended keys
     // (right ctrl/alt, Win/Apps, navigation block, arrows).
-    private static readonly Dictionary<string, (int scanCode, bool e0)> Interception =
-        new(StringComparer.OrdinalIgnoreCase)
+    private static readonly FrozenDictionary<string, (ushort scanCode, bool e0)> Interception =
+        new Dictionary<string, (ushort scanCode, bool e0)>(StringComparer.OrdinalIgnoreCase)
         {
             // Modifiers
             ["ctrl"] = (0x1D, false),   // Left Ctrl
@@ -180,10 +183,10 @@ public static class KeyNames
             ["3"] = (0x04, false), ["4"] = (0x05, false), ["5"] = (0x06, false),
             ["6"] = (0x07, false), ["7"] = (0x08, false), ["8"] = (0x09, false),
             ["9"] = (0x0A, false),
-        };
+        }.ToFrozenDictionary();
 
     // Aliases -> canonical name.
-    private static readonly Dictionary<string, string> Aliases = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly FrozenDictionary<string, string> Aliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
         ["control"] = "ctrl",
         ["strg"] = "ctrl",
@@ -214,7 +217,7 @@ public static class KeyNames
         ["arrowdown"] = "down",
         ["arrowleft"] = "left",
         ["arrowright"] = "right",
-    };
+    }.ToFrozenDictionary();
 
     private static string Normalize(string name)
     {
@@ -223,13 +226,13 @@ public static class KeyNames
     }
 
     /// <summary>Resolves a key name to its Linux evdev key code.</summary>
-    public static bool TryGetLinux(string name, out int keyCode)
+    public static bool TryGetLinux(string name, out ushort keyCode)
     {
         return Linux.TryGetValue(Normalize(name), out keyCode);
     }
 
     /// <summary>Resolves a key name to its Windows virtual-key code (VK_*) and extended flag.</summary>
-    public static bool TryGetWindows(string name, out int virtualKey, out bool extended)
+    public static bool TryGetWindows(string name, out uint virtualKey, out bool extended)
     {
         if (Windows.TryGetValue(Normalize(name), out var entry))
         {
@@ -244,7 +247,7 @@ public static class KeyNames
     }
 
     /// <summary>Resolves a key name to its PS/2 set-1 scan code and E0-extended flag (for Interception).</summary>
-    public static bool TryGetInterception(string name, out int scanCode, out bool e0)
+    public static bool TryGetInterception(string name, out ushort scanCode, out bool e0)
     {
         if (Interception.TryGetValue(Normalize(name), out var entry))
         {
@@ -259,5 +262,5 @@ public static class KeyNames
     }
 
     /// <summary>All Linux evdev key codes used by the name table (for uinput keybit registration).</summary>
-    public static IEnumerable<int> AllLinuxKeyCodes => Linux.Values;
+    public static ImmutableArray<ushort> AllLinuxKeyCodes => Linux.Values;
 }

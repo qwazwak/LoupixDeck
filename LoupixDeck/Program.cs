@@ -4,6 +4,7 @@ using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using LoupixDeck.Services;
 using LoupixDeck.Utils;
+using LoupixDeck.Native;
 
 namespace LoupixDeck;
 
@@ -207,18 +208,6 @@ sealed class Program
     }
 #endif
 
-#if WINDOWS
-    private const int AttachParentProcess = -1;
-
-    [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
-    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
-    private static extern bool AttachConsole(int dwProcessId);
-
-    [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
-    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
-    private static extern bool AllocConsole();
-#endif
-
     /// <summary>
     /// Debug builds send console output to the terminal for live diagnostics;
     /// release builds redirect it to a log file. Because this is a WinExe (GUI
@@ -235,8 +224,8 @@ sealed class Program
             // AttachConsole/AllocConsole both fail (returning false) when a
             // console is already shared from `dotnet run`; that's fine — we just
             // rebind to whatever console we end up with so AutoFlush is on.
-            if (!AttachConsole(AttachParentProcess))
-                AllocConsole();
+            if (!Kernel32.AttachConsoleToProcessParent())
+                Kernel32.AllocConsole();
 
             var stdout = new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true };
             Console.SetOut(stdout);

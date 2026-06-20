@@ -59,7 +59,7 @@ public sealed class NativeHapticService : INativeHapticService, IDisposable
         }
     }
 
-    private void OnTouchButtonChanged(object sender, PropertyChangedEventArgs e)
+    private void OnTouchButtonChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(TouchButton.VibrationEnabled) ||
             e.PropertyName == nameof(TouchButton.VibrationPattern))
@@ -68,7 +68,7 @@ public sealed class NativeHapticService : INativeHapticService, IDisposable
         }
     }
 
-    private void OnStepsChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void OnStepsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         RebindSteps();
         Schedule();
@@ -88,9 +88,9 @@ public sealed class NativeHapticService : INativeHapticService, IDisposable
         }
     }
 
-    private void OnStepChanged(object sender, PropertyChangedEventArgs e) => Schedule();
+    private void OnStepChanged(object? sender, PropertyChangedEventArgs e) => Schedule();
 
-    private void OnConfigChanged(object sender, PropertyChangedEventArgs e)
+    private void OnConfigChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != null && HapticProps.Contains(e.PropertyName))
             Schedule();

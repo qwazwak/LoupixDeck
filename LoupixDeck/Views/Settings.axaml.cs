@@ -110,7 +110,7 @@ public partial class Settings : Window
 
     // ───────── Install / Remove (local, restart-based lifecycle) ─────────
 
-    private async void OnInstallPluginClick(object sender, RoutedEventArgs e)
+    private async void OnInstallPluginClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not SettingsViewModel vm)
             return;
@@ -126,7 +126,7 @@ public partial class Settings : Window
         PopulatePluginList();
     }
 
-    private async void OnRemovePluginClick(object sender, RoutedEventArgs e)
+    private async void OnRemovePluginClick(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not SettingsViewModel vm)
             return;
@@ -177,7 +177,7 @@ public partial class Settings : Window
         PluginActionStatus.IsVisible = !string.IsNullOrEmpty(message);
     }
 
-    private void OnPluginSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void OnPluginSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (PluginSettingsHost == null)
             return;

@@ -161,7 +161,7 @@ public partial class MacroEditorViewModel : DialogViewModelBase<DialogResult>, I
 
     // ───────── Instant apply ─────────
 
-    private void Macros_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void Macros_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.OldItems != null)
         {
@@ -194,13 +194,13 @@ public partial class MacroEditorViewModel : DialogViewModelBase<DialogResult>, I
             step.PropertyChanged -= Step_PropertyChanged;
     }
 
-    private void Macro_PropertyChanged(object sender, PropertyChangedEventArgs e)
+    private void Macro_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(Macro.Name))
             ScheduleApply();
     }
 
-    private void Steps_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void Steps_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.OldItems != null)
         {
@@ -217,7 +217,7 @@ public partial class MacroEditorViewModel : DialogViewModelBase<DialogResult>, I
         ScheduleApply();
     }
 
-    private void Step_PropertyChanged(object sender, PropertyChangedEventArgs e)
+    private void Step_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (!NonPersistedStepProperties.Contains(e.PropertyName))
             ScheduleApply();

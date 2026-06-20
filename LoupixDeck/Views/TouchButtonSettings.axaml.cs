@@ -111,7 +111,7 @@ public partial class TouchButtonSettings : Window
         };
     }
 
-    private async void ResetButton_Click(object sender, RoutedEventArgs e)
+    private async void ResetButton_Click(object? sender, RoutedEventArgs e)
     {
         if (DataContext is not TouchButtonSettingsViewModel vm) return;
 
@@ -129,7 +129,7 @@ public partial class TouchButtonSettings : Window
     // ───────── Command chain: active slot / remove / reorder / drag-insert ─────────
 
     /// <summary>Clicking anywhere inside a sequence strip makes it the double-click target.</summary>
-    private void OnAnyPointerPressed(object sender, PointerPressedEventArgs e)
+    private void OnAnyPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (DataContext is not TouchButtonSettingsViewModel vm)
             return;
@@ -148,7 +148,7 @@ public partial class TouchButtonSettings : Window
     }
 
     /// <summary>Hooks a realized strip's chip list for connector-visibility upkeep.</summary>
-    private void SlotChipList_Loaded(object sender, RoutedEventArgs e)
+    private void SlotChipList_Loaded(object? sender, RoutedEventArgs e)
     {
         if (sender is not ItemsControl list || !_hookedChipLists.Add(list))
             return;
@@ -156,7 +156,7 @@ public partial class TouchButtonSettings : Window
         list.LayoutUpdated += (_, _) => UpdateConnectorVisibility(list);
     }
 
-    private void RemoveCommand_Click(object sender, RoutedEventArgs e)
+    private void RemoveCommand_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is Button { DataContext: CommandSegment segment } button &&
             ResolveSlot(button) is { } slot)
@@ -169,7 +169,7 @@ public partial class TouchButtonSettings : Window
     // owning (stable) ItemsControl, then every move maps the pointer to a target
     // index and moves the card within its slot immediately.
 
-    private void CommandDragHandle_PointerPressed(object sender, PointerPressedEventArgs e)
+    private void CommandDragHandle_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (sender is not Control { DataContext: CommandSegment segment } control)
             return;
@@ -189,7 +189,7 @@ public partial class TouchButtonSettings : Window
         e.Handled = true;
     }
 
-    private void CommandList_PointerMoved(object sender, PointerEventArgs e)
+    private void CommandList_PointerMoved(object? sender, PointerEventArgs e)
     {
         if (_draggedSegment == null || _dragList == null)
             return;
@@ -209,7 +209,7 @@ public partial class TouchButtonSettings : Window
         UpdateDropMarker(_dragList, FindDropIndex(_dragList, e));
     }
 
-    private void CommandList_PointerReleased(object sender, PointerReleasedEventArgs e)
+    private void CommandList_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (_segmentDragging && _draggedSegment != null && _dragList != null && _dragSlot != null)
         {
@@ -227,7 +227,7 @@ public partial class TouchButtonSettings : Window
         EndCommandDrag(e.Pointer);
     }
 
-    private void CommandList_PointerCaptureLost(object sender, PointerCaptureLostEventArgs e)
+    private void CommandList_PointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
         => EndCommandDrag(null);
 
     private void EndCommandDrag(IPointer pointer)
@@ -333,7 +333,7 @@ public partial class TouchButtonSettings : Window
     // arm on press, promote to a drag past a small threshold, then track the pointer
     // (captured on the tree) and insert on release into whichever strip it's over.
 
-    private void SystemCommandsTree_PointerMoved(object sender, PointerEventArgs e)
+    private void SystemCommandsTree_PointerMoved(object? sender, PointerEventArgs e)
     {
         if (_treeDragCandidate == null)
             return;
@@ -387,7 +387,7 @@ public partial class TouchButtonSettings : Window
 
     private void HideDragGhost() => DragGhostLayer.IsVisible = false;
 
-    private void SystemCommandsTree_PointerReleased(object sender, PointerReleasedEventArgs e)
+    private void SystemCommandsTree_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (_treeDragging && _treeDragCandidate != null && StripUnderPointer(e) is { } target &&
             target.List.DataContext is CommandSequenceSlot slot)
@@ -398,7 +398,7 @@ public partial class TouchButtonSettings : Window
         EndTreeDrag(e.Pointer);
     }
 
-    private void SystemCommandsTree_PointerCaptureLost(object sender, PointerCaptureLostEventArgs e)
+    private void SystemCommandsTree_PointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
         => EndTreeDrag(null);
 
     private void EndTreeDrag(IPointer pointer)
@@ -459,13 +459,13 @@ public partial class TouchButtonSettings : Window
         PreviewScroll.Offset = new Vector(x, y);
     }
 
-    private async void ChangeSymbol_Click(object sender, RoutedEventArgs e)
+    private async void ChangeSymbol_Click(object? sender, RoutedEventArgs e)
     {
         if (DataContext is TouchButtonSettingsViewModel vm)
             await vm.ChangeSelectedSymbolAsync();
     }
 
-    private void OnPointerPressed(object sender, PointerPressedEventArgs e)
+    private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         // The handler sits on the row's full-width root container, so its
         // DataContext is the entry regardless of where in the row the click lands.
@@ -495,7 +495,7 @@ public partial class TouchButtonSettings : Window
     // movement tolerance itself, and re-arms after each pair — so the same command
     // can be added repeatedly without jiggling the mouse, and a little jitter
     // between the two clicks no longer cancels the double-click.
-    private void OnCommandDoubleTapped(object sender, TappedEventArgs e)
+    private void OnCommandDoubleTapped(object? sender, TappedEventArgs e)
     {
         if (sender is Control { DataContext: MenuEntry menuEntry } &&
             menuEntry.Command != null && !string.IsNullOrWhiteSpace(menuEntry.Command) &&
@@ -507,7 +507,7 @@ public partial class TouchButtonSettings : Window
         }
     }
 
-    private void Editor_PointerPressed(object sender, PointerPressedEventArgs e)
+    private void Editor_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (DataContext is not TouchButtonSettingsViewModel vm || vm.ButtonData == null) return;
 
@@ -543,7 +543,7 @@ public partial class TouchButtonSettings : Window
         vm.SelectedLayer = null;
     }
 
-    private void Editor_PointerMoved(object sender, PointerEventArgs e)
+    private void Editor_PointerMoved(object? sender, PointerEventArgs e)
     {
         if (_dragMode == DragMode.None) return;
         if (DataContext is not TouchButtonSettingsViewModel vm || vm.SelectedLayer == null) return;
@@ -612,7 +612,7 @@ public partial class TouchButtonSettings : Window
         e.Handled = true;
     }
 
-    private void Editor_PointerReleased(object sender, PointerReleasedEventArgs e)
+    private void Editor_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (_dragMode == DragMode.None) return;
         _dragMode = DragMode.None;

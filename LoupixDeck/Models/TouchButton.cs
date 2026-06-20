@@ -9,7 +9,7 @@ using SkiaSharp;
 
 namespace LoupixDeck.Models;
 
-public class TouchButton : LoupedeckButton
+public partial class TouchButton : LoupedeckButton
 {
     public TouchButton(int index)
     {
@@ -26,18 +26,9 @@ public class TouchButton : LoupedeckButton
 
     public int Index { get; set; }
 
-    private Color _backColor = Colors.Black;
-
-    public Color BackColor
-    {
-        get => _backColor;
-        set
-        {
-            if (Equals(value, _backColor)) return;
-            _backColor = value;
-            Refresh();
-        }
-    }
+    [ObservableProperty]
+    public partial Color BackColor { get; set; } = Colors.Black;
+    partial void OnBackColorChanged(Color value) => Refresh();
 
     [ObservableProperty]
     public partial bool VibrationEnabled { get; set; }
@@ -120,7 +111,7 @@ public class TouchButton : LoupedeckButton
         }
     }
 
-    private void Layers_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void Layers_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (e.OldItems != null)
         {
@@ -137,7 +128,7 @@ public class TouchButton : LoupedeckButton
         Refresh();
     }
 
-    private void Layer_PropertyChanged(object sender, PropertyChangedEventArgs e)
+    private void Layer_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         Refresh();
     }

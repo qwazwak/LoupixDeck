@@ -28,7 +28,7 @@ public partial class PageCommandsSettings : Window
 
     // Track which command TextBox the user clicked into last; double-clicking a
     // tree entry appends the formatted command to that box.
-    private void OnCommandBoxFocused(object sender, Avalonia.Input.FocusChangedEventArgs e)
+    private void OnCommandBoxFocused(object? sender, Avalonia.Input.FocusChangedEventArgs e)
     {
         if (sender is not TextBox tb || tb.DataContext is not WrapSlot slot) return;
         if (DataContext is not PageCommandsSettingsViewModel vm) return;
@@ -36,7 +36,7 @@ public partial class PageCommandsSettings : Window
         vm.SetActiveTarget(slot, isPost);
     }
 
-    private void OnPointerPressed(object sender, PointerPressedEventArgs e)
+    private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (e.Source is TextBlock textBlock && textBlock.DataContext is MenuEntry menuEntry &&
             menuEntry.Command != null && !string.IsNullOrWhiteSpace(menuEntry.Command))

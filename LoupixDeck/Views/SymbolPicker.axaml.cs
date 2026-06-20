@@ -26,7 +26,7 @@ public partial class SymbolPicker : Window
         };
     }
 
-    private void SymbolList_DoubleTapped(object sender, TappedEventArgs e)
+    private void SymbolList_DoubleTapped(object? sender, TappedEventArgs e)
     {
         if (DataContext is SymbolPickerViewModel vm)
             vm.ConfirmSelection();

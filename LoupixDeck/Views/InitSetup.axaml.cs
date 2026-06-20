@@ -28,7 +28,7 @@ public partial class InitSetup : Window
 
     private bool _allowClose;
 
-    private void OnWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+    private void OnWindowClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         if (!_allowClose)
         {

@@ -5,7 +5,6 @@ using LoupixDeck.Services;
 using LoupixDeck.Utils;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 namespace LoupixDeck.ViewModels;
 
@@ -15,7 +14,8 @@ namespace LoupixDeck.ViewModels;
 /// string and fed back into <see cref="ICommandBuilder.BuildCommandString"/>,
 /// which only ever calls <c>ToString()</c> on it.
 /// </summary>
-public class CommandParameter : INotifyPropertyChanged
+[ObservableObject]
+public partial class CommandParameter
 {
     public string Name { get; }
     public Type ParameterType { get; }
@@ -35,33 +35,19 @@ public class CommandParameter : INotifyPropertyChanged
         IsEnum = ParameterType.IsEnum;
         if (IsEnum)
             Options = Enum.GetNames(ParameterType);
-        _value = value ?? string.Empty;
+        Value = value ?? string.Empty;
     }
 
-    private string _value;
-    public string Value
-    {
-        get => _value;
-        set
-        {
-            if (_value == value) return;
-            _value = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(BoolValue));
-        }
-    }
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(BoolValue))]
+    public partial string Value { get; set; }
 
     /// <summary>Two-way bridge for the bool checkbox — parses/serialises <see cref="Value"/>.</summary>
     public bool BoolValue
     {
-        get => bool.TryParse(_value, out var b) && b;
+        get => bool.TryParse(Value, out var b) && b;
         set => Value = value ? "True" : "False";
     }
-
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
 
 /// <summary>
@@ -149,7 +135,7 @@ public partial class CommandSegment
         return segment;
     }
 
-    private void OnParameterChanged(object sender, PropertyChangedEventArgs e)
+    private void OnParameterChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName != nameof(CommandParameter.Value)) return;
         RebuildRaw();

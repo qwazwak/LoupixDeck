@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Platform;
+using CommunityToolkit.Mvvm.Input;
 using LoupixDeck.Models;
 using LoupixDeck.Utils;
 using LoupixDeck.ViewModels;
@@ -15,9 +16,10 @@ public partial class MainWindow : Window
     private bool _isMinimizedToTray;
 
     // Static Commands
-    private ICommand ShowCommand { get; }
-    private ICommand QuitCommand { get; }
-    private ICommand ToggleDeviceCommand { get; }
+    private IRelayCommand ShowCommand => field ??= Relay.Create(() => Instance?.ShowFromTray());
+    private IRelayCommand QuitCommand => field ??= Relay.Create(() => Instance?.QuitApplication());
+    private IRelayCommand ToggleDeviceCommand => field ??= Relay.Create(() =>
+            Avalonia.Threading.Dispatcher.UIThread.Post(() => Instance?.ViewModel?.SelectedDevice?.ToggleDeviceStateCommand?.Execute(null)));
 
     private static MainWindow Instance { get; set; }
 
@@ -31,12 +33,6 @@ public partial class MainWindow : Window
 
         Instance = this;
 
-        ShowCommand = new RelayCommand(() => Instance?.ShowFromTray());
-        QuitCommand = new RelayCommand(() => Instance?.QuitApplication());
-        ToggleDeviceCommand = new RelayCommand(() =>
-            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-                Instance?.ViewModel?.SelectedDevice?.ToggleDeviceStateCommand?.Execute(null)));
-
         CreateTrayIcon();
 
         this.Closing += OnWindowClosing;
@@ -49,7 +45,7 @@ public partial class MainWindow : Window
     /// resolve unchanged. Unknown slugs fall through to Live S to keep something
     /// rendered rather than a blank window.
     /// </summary>
-    private void OnDataContextChanged(object sender, System.EventArgs e)
+    private void OnDataContextChanged(object? sender, System.EventArgs e)
     {
         _shell?.PropertyChanged -= OnShellPropertyChanged;
         _shell = DataContext as MainShellViewModel;
@@ -58,7 +54,7 @@ public partial class MainWindow : Window
         UpdateDeviceLayout();
     }
 
-    private void OnShellPropertyChanged(object sender, PropertyChangedEventArgs e)
+    private void OnShellPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(MainShellViewModel.SelectedDevice))
             UpdateDeviceLayout();
@@ -125,7 +121,7 @@ public partial class MainWindow : Window
         _trayIcon.Clicked += (_, _) => ShowFromTray();
     }
 
-    private void OnWindowClosing(object sender, WindowClosingEventArgs e)
+    private void OnWindowClosing(object? sender, WindowClosingEventArgs e)
     {
         // Already on the way out (via tray Quit / hamburger Quit) — let it close.
         if (_isQuitting) return;

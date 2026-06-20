@@ -12,14 +12,14 @@ public interface INotifications : IDBusObject
 
 public interface IDBusController
 {
-    Task SendNotificationAsync(string title, 
+    Task SendNotificationAsync(string title,
         string body,
         int expireTimeout = 5000);
 }
 
 public class DBusController : IDBusController
 {
-    public async Task SendNotificationAsync(string title, 
+    public async Task SendNotificationAsync(string title,
                                             string body,
                                             int expireTimeout = 5000)
     {

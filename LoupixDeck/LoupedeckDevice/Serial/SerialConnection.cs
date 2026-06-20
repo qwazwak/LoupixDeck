@@ -85,7 +85,7 @@ public class SerialConnection : ISerialConnection
     public bool IsReady => _serialPort is not null && _serialPort.IsOpen;
 
     /// <summary>
-    /// Establishes the connection and performs the handshake. 
+    /// Establishes the connection and performs the handshake.
     /// Afterwards, starts a thread that continuously parses and reads incoming data.
     /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if the port is already open.</exception>
@@ -351,7 +351,7 @@ public class SerialConnection : ISerialConnection
     }
 
     /// <summary>
-    /// Thread routine that continuously reads incoming data. 
+    /// Thread routine that continuously reads incoming data.
     /// Once complete packets are detected, triggers the <see cref="MessageReceived"/> event.
     /// </summary>
     private void ReadLoop()

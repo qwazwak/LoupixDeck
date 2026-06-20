@@ -101,7 +101,7 @@ public partial class TouchButtonPage
     [JsonIgnore]
     public bool WallpaperInvalidated => false;
 
-    private void OnWallpaperSlotChanged(object sender, EventArgs e)
+    private void OnWallpaperSlotChanged(object? sender, EventArgs e)
     {
         OnPropertyChanged(nameof(Wallpaper));
         OnPropertyChanged(nameof(WallpaperInvalidated));

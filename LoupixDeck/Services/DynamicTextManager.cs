@@ -409,7 +409,7 @@ public class DynamicTextManager : IDynamicTextManager, IDisposable
             return string.Empty;
 
         var end = command.IndexOf('(');
-        return end == -1 ? command : command.Substring(0, end);
+        return end == -1 ? command : command[..end];
     }
 
     private static string[] ParseParameters(string command)

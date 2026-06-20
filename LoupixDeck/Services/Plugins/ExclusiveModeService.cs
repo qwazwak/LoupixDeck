@@ -56,5 +56,5 @@ public sealed class ExclusiveModeService : IExclusiveModeService
         StateChanged?.Invoke();
     }
 
-    private void OnProviderEntriesChanged(object sender, EventArgs e) => StateChanged?.Invoke();
+    private void OnProviderEntriesChanged(object? sender, EventArgs e) => StateChanged?.Invoke();
 }

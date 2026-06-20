@@ -1,4 +1,4 @@
-﻿using System.Windows.Input;
+#nullable enable
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LoupixDeck.Controllers;
@@ -9,8 +9,8 @@ using LoupixDeck.Services.Commands;
 using LoupixDeck.Services.Plugins;
 using LoupixDeck.Services.SystemPower;
 using LoupixDeck.ViewModels.Base;
+using LoupixDeck.Utils;
 using AsyncRelayCommand = CommunityToolkit.Mvvm.Input.AsyncRelayCommand;
-using RelayCommand = LoupixDeck.Utils.RelayCommand;
 
 namespace LoupixDeck.ViewModels;
 
@@ -18,42 +18,44 @@ public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly IDialogService _dialogService;
 
-    public ICommand RotaryButtonCommand { get; }
-    public ICommand SimpleButtonCommand { get; }
-    public ICommand TouchButtonCommand { get; }
+    public IAsyncRelayCommand<RotaryButton> RotaryButtonCommand => Relay.Create(ref field, RotaryButton_Click);
+    public IAsyncRelayCommand<SimpleButton> SimpleButtonCommand => Relay.Create(ref field, SimpleButton_Click);
+    public IAsyncRelayCommand<TouchButton> TouchButtonCommand => Relay.Create(ref field, TouchButton_Click);
 
-    public ICommand AddRotaryPageCommand { get; }
-    public ICommand DeleteRotaryPageCommand { get; }
-    public ICommand RotaryPageButtonCommand { get; }
-    public ICommand NextRotaryPageCommand { get; }
-    public ICommand PreviousRotaryPageCommand { get; }
+    public IRelayCommand AddRotaryPageCommand => Relay.Create(ref field, AddRotaryPageButton_Click);
+    public IRelayCommand DeleteRotaryPageCommand => Relay.Create(ref field, DeleteRotaryPageButton_Click);
+    public IRelayCommand<int> RotaryPageButtonCommand => Relay.Create(ref field, RotaryPageButton_Click);
+    public IRelayCommand NextRotaryPageCommand => Relay.Create(ref field, NextRotaryPage_Click);
+    public IRelayCommand PreviousRotaryPageCommand => Relay.Create(ref field, PreviousRotaryPage_Click);
 
     // Side-specific rotary paging — used by the Razer layout, whose two dial columns
     // page independently. Bound per side (Left/Right) in the device layout.
-    public ICommand AddLeftRotaryPageCommand { get; }
-    public ICommand DeleteLeftRotaryPageCommand { get; }
-    public ICommand NextLeftRotaryPageCommand { get; }
-    public ICommand PreviousLeftRotaryPageCommand { get; }
-    public ICommand AddRightRotaryPageCommand { get; }
-    public ICommand DeleteRightRotaryPageCommand { get; }
-    public ICommand NextRightRotaryPageCommand { get; }
-    public ICommand PreviousRightRotaryPageCommand { get; }
+    public IRelayCommand AddLeftRotaryPageCommand => Relay.Create(ref field, () => AddRotaryPageForSide(RotarySide.Left));
+    public IRelayCommand DeleteLeftRotaryPageCommand => Relay.Create(ref field, () => DeleteRotaryPageForSide(RotarySide.Left));
+    public IRelayCommand NextLeftRotaryPageCommand => Relay.Create(ref field, () => PageRotaryForSide(RotarySide.Left, next: true));
+    public IRelayCommand PreviousLeftRotaryPageCommand => Relay.Create(ref field, () => PageRotaryForSide(RotarySide.Left, next: false));
+    public IRelayCommand AddRightRotaryPageCommand => Relay.Create(ref field, () => AddRotaryPageForSide(RotarySide.Right));
+    public IRelayCommand DeleteRightRotaryPageCommand => Relay.Create(ref field, () => DeleteRotaryPageForSide(RotarySide.Right));
+    public IRelayCommand NextRightRotaryPageCommand => Relay.Create(ref field, () => PageRotaryForSide(RotarySide.Right, next: true));
+    public IRelayCommand PreviousRightRotaryPageCommand => Relay.Create(ref field, () => PageRotaryForSide(RotarySide.Right, next: false));
 
-    /// <summary>Opens the free-draw canvas editor for a side strip (Razer). No-op unless
-    /// that side is in FreeDraw mode.</summary>
-    public ICommand EditStripCanvasCommand { get; }
+    /// <summary>
+    /// Opens the free-draw canvas editor for a side strip (Razer).
+    /// </summary>
+    /// <remarks>No-op unless that side is in FreeDraw mode.</remarks>
+    public IAsyncRelayCommand<RotarySide> EditStripCanvasCommand => Relay.Create(ref field, EditStripCanvas_Click);
 
 
-    public ICommand AddTouchPageCommand { get; }
-    public ICommand DeleteTouchPageCommand { get; }
-    public ICommand TouchPageButtonCommand { get; }
-    public ICommand NextTouchPageCommand { get; }
-    public ICommand PreviousTouchPageCommand { get; }
+    public IRelayCommand AddTouchPageCommand => Relay.Create(ref field, AddTouchPageButton_Click);
+    public IRelayCommand DeleteTouchPageCommand => Relay.Create(ref field, DeleteTouchPageButton_Click);
+    public IRelayCommand<int> TouchPageButtonCommand => Relay.Create(ref field, TouchPageButton_Click);
+    public IRelayCommand NextTouchPageCommand => Relay.Create(ref field, NextTouchPage_Click);
+    public IRelayCommand PreviousTouchPageCommand => Relay.Create(ref field, PreviousTouchPage_Click);
 
-    public ICommand SettingsMenuCommand { get; }
-    public ICommand MacroEditorMenuCommand { get; }
-    public ICommand AboutMenuCommand { get; }
-    public ICommand ToggleDeviceStateCommand { get; }
+    public IAsyncRelayCommand SettingsMenuCommand => Relay.Create(ref field, SettingsMenuButton_Click);
+    public IAsyncRelayCommand MacroEditorMenuCommand => Relay.Create(ref field, MacroEditorMenuButton_Click);
+    public IAsyncRelayCommand AboutMenuCommand => Relay.Create(ref field, AboutMenuButton_Click);
+    public IAsyncRelayCommand ToggleDeviceStateCommand => Relay.Create(ref field, LoupedeckController.ToggleDeviceState);
 
     public LoupedeckLiveSController LoupedeckController { get; }
 
@@ -194,7 +196,7 @@ public partial class MainWindowViewModel : ViewModelBase
         _exclusiveMode.StateChanged -= OnExclusiveModeStateChanged;
     }
 
-    private void OnThemeVariantChanged(object sender, EventArgs e)
+    private void OnThemeVariantChanged(object? sender, EventArgs e)
     {
         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {

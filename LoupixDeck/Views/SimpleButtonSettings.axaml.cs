@@ -51,7 +51,7 @@ public partial class SimpleButtonSettings : Window
 
     // ───────── Command chain: remove / reorder / drag-insert ─────────
 
-    private void RemoveCommand_Click(object sender, RoutedEventArgs e)
+    private void RemoveCommand_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is Button { DataContext: CommandSegment segment } &&
             DataContext is SimpleButtonSettingsViewModel vm)
@@ -64,7 +64,7 @@ public partial class SimpleButtonSettings : Window
     // (stable) ItemsControl, then every move maps the pointer to a target index and
     // moves the chip there immediately.
 
-    private void CommandDragHandle_PointerPressed(object sender, PointerPressedEventArgs e)
+    private void CommandDragHandle_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (sender is not Control { DataContext: CommandSegment segment })
             return;
@@ -81,7 +81,7 @@ public partial class SimpleButtonSettings : Window
         e.Handled = true;
     }
 
-    private void CommandList_PointerMoved(object sender, PointerEventArgs e)
+    private void CommandList_PointerMoved(object? sender, PointerEventArgs e)
     {
         if (_draggedSegment == null)
             return;
@@ -101,7 +101,7 @@ public partial class SimpleButtonSettings : Window
         UpdateDropMarker(FindDropIndex(e));
     }
 
-    private void CommandList_PointerReleased(object sender, PointerReleasedEventArgs e)
+    private void CommandList_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (_segmentDragging && _draggedSegment != null &&
             DataContext is SimpleButtonSettingsViewModel vm)
@@ -120,7 +120,7 @@ public partial class SimpleButtonSettings : Window
         EndCommandDrag(e.Pointer);
     }
 
-    private void CommandList_PointerCaptureLost(object sender, PointerCaptureLostEventArgs e)
+    private void CommandList_PointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
         => EndCommandDrag(null);
 
     private void EndCommandDrag(IPointer pointer)
@@ -226,7 +226,7 @@ public partial class SimpleButtonSettings : Window
     // chip reorder: arm on press, promote to a drag past a small threshold, then track
     // the pointer (captured on the tree) and insert on release when over the chain.
 
-    private void SystemCommandsTree_PointerMoved(object sender, PointerEventArgs e)
+    private void SystemCommandsTree_PointerMoved(object? sender, PointerEventArgs e)
     {
         if (_treeDragCandidate == null)
             return;
@@ -278,7 +278,7 @@ public partial class SimpleButtonSettings : Window
 
     private void HideDragGhost() => DragGhostLayer.IsVisible = false;
 
-    private void SystemCommandsTree_PointerReleased(object sender, PointerReleasedEventArgs e)
+    private void SystemCommandsTree_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         if (_treeDragging && _treeDragCandidate != null &&
             DataContext is SimpleButtonSettingsViewModel vm && IsOverDropZone(e))
@@ -289,7 +289,7 @@ public partial class SimpleButtonSettings : Window
         EndTreeDrag(e.Pointer);
     }
 
-    private void SystemCommandsTree_PointerCaptureLost(object sender, PointerCaptureLostEventArgs e)
+    private void SystemCommandsTree_PointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
         => EndTreeDrag(null);
 
     private void EndTreeDrag(IPointer pointer)
@@ -310,7 +310,7 @@ public partial class SimpleButtonSettings : Window
                pos.Y <= CommandDropZone.Bounds.Height;
     }
 
-    private void OnPointerPressed(object sender, PointerPressedEventArgs e)
+    private void OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
         // The handler sits on the row's full-width root container, so its
         // DataContext is the entry regardless of where in the row the click lands.
@@ -340,7 +340,7 @@ public partial class SimpleButtonSettings : Window
     // movement tolerance itself, and re-arms after each pair — so the same command
     // can be added repeatedly without jiggling the mouse, and a little jitter
     // between the two clicks no longer cancels the double-click.
-    private void OnCommandDoubleTapped(object sender, TappedEventArgs e)
+    private void OnCommandDoubleTapped(object? sender, TappedEventArgs e)
     {
         if (sender is Control { DataContext: MenuEntry menuEntry } &&
             menuEntry.Command != null && !string.IsNullOrWhiteSpace(menuEntry.Command) &&

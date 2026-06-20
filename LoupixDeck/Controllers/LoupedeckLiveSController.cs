@@ -426,7 +426,7 @@ public partial class LoupedeckLiveSController(
         return (page, page.RotaryButtons[localIndex]);
     }
 
-    private void OnSwipe(object sender, SwipeEventArgs e)
+    private void OnSwipe(object? sender, SwipeEventArgs e)
     {
         // Mark this device as the ambient target so any plugin (side-strip session,
         // exclusive provider) reached while handling this input acts on THIS device.
@@ -803,7 +803,7 @@ public partial class LoupedeckLiveSController(
 
     /// <summary>StripChanged handler — coalesced, rate-limited per-side redraw. May be
     /// invoked from a plugin background thread.</summary>
-    private void OnStripSessionChanged(object sender, EventArgs e)
+    private void OnStripSessionChanged(object? sender, EventArgs e)
     {
         if (sender is not ISideStripSession session) return;
         var idx = ReferenceEquals(_stripSession[0], session) ? 0
@@ -853,7 +853,7 @@ public partial class LoupedeckLiveSController(
         slot is LoupedeckDevice.Device.RazerStreamControllerDevice.LeftSideIndex
              or LoupedeckDevice.Device.RazerStreamControllerDevice.RightSideIndex;
 
-    private void OnSimpleButtonPress(object sender, ButtonEventArgs e)
+    private void OnSimpleButtonPress(object? sender, ButtonEventArgs e)
     {
         using var _routerScope = router.Enter(serviceProvider);
 
@@ -934,7 +934,7 @@ public partial class LoupedeckLiveSController(
         });
     }
 
-    private void OnTouchButtonPress(object sender, TouchEventArgs e)
+    private void OnTouchButtonPress(object? sender, TouchEventArgs e)
     {
         using var _routerScope = router.Enter(serviceProvider);
 
@@ -1105,7 +1105,7 @@ public partial class LoupedeckLiveSController(
         }
     }
 
-    private void OnRotate(object sender, RotateEventArgs e)
+    private void OnRotate(object? sender, RotateEventArgs e)
     {
         using var _routerScope = router.Enter(serviceProvider);
 
@@ -1477,7 +1477,7 @@ public partial class LoupedeckLiveSController(
             _ = RedrawSideStrips();
     }
 
-    private void TouchButtonPagesOnCollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    private void TouchButtonPagesOnCollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
         // Subscribe to property changes for newly added pages
         if (e.NewItems != null)
@@ -1504,7 +1504,7 @@ public partial class LoupedeckLiveSController(
         }
     }
 
-    private async void TouchButtonPageOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+    private async void TouchButtonPageOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (sender is not TouchButtonPage page) return;
 
@@ -1537,7 +1537,7 @@ public partial class LoupedeckLiveSController(
         }
     }
 
-    private async void TouchItemChanged(object sender, EventArgs e)
+    private async void TouchItemChanged(object? sender, EventArgs e)
     {
         if (sender is not TouchButton item) return;
 
@@ -1566,7 +1566,7 @@ public partial class LoupedeckLiveSController(
         page.StripCanvas.ItemChanged += StripCanvasItemChanged;
     }
 
-    private async void StripCanvasItemChanged(object sender, EventArgs e)
+    private async void StripCanvasItemChanged(object? sender, EventArgs e)
     {
         if (sender is not TouchButton canvas) return;
         if (_isDeviceOff || folderNav.IsActive || exclusiveMode.IsActive) return;
@@ -1648,7 +1648,7 @@ public partial class LoupedeckLiveSController(
         return button;
     }
 
-    private async void SimpleButtonChanged(object sender, EventArgs e)
+    private async void SimpleButtonChanged(object? sender, EventArgs e)
     {
         if (sender is not SimpleButton button) return;
 
@@ -1743,8 +1743,8 @@ public partial class LoupedeckLiveSController(
     }
 
     private CancellationTokenSource _propertyChangedCts;
-    
-    private async void ConfigOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+
+    private async void ConfigOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         _propertyChangedCts?.Cancel();
         _propertyChangedCts = new CancellationTokenSource();

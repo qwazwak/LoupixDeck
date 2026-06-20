@@ -43,13 +43,13 @@ public partial class MacroEditor : Window
 
     // ───────── Add / Edit / Remove steps ─────────
 
-    private void AddStepMenu_Click(object sender, RoutedEventArgs e)
+    private void AddStepMenu_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is MenuItem { Tag: string stepType })
             ViewModel?.AddStepCommand.Execute(stepType);
     }
 
-    private void RemoveStep_Click(object sender, RoutedEventArgs e)
+    private void RemoveStep_Click(object? sender, RoutedEventArgs e)
     {
         if (sender is Button { DataContext: MacroStep step })
             ViewModel?.RemoveStep(step);
@@ -57,7 +57,7 @@ public partial class MacroEditor : Window
 
     // ───────── Command tree (CommandStep editor) ─────────
 
-    private void CommandTree_PointerPressed(object sender, PointerPressedEventArgs e)
+    private void CommandTree_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (e.ClickCount != 2)
             return;
@@ -81,7 +81,7 @@ public partial class MacroEditor : Window
     // pointer position to a target index and moves the dragged step there
     // immediately — the list reorders live while dragging.
 
-    private void DragHandle_PointerPressed(object sender, PointerPressedEventArgs e)
+    private void DragHandle_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
         if (sender is not Control { DataContext: MacroStep step })
             return;
@@ -98,7 +98,7 @@ public partial class MacroEditor : Window
         e.Handled = true;
     }
 
-    private void StepsList_PointerMoved(object sender, PointerEventArgs e)
+    private void StepsList_PointerMoved(object? sender, PointerEventArgs e)
     {
         if (_draggedStep == null)
             return;
@@ -116,12 +116,12 @@ public partial class MacroEditor : Window
             steps.Move(currentIndex, targetIndex);
     }
 
-    private void StepsList_PointerReleased(object sender, PointerReleasedEventArgs e)
+    private void StepsList_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
         EndDrag(e.Pointer);
     }
 
-    private void StepsList_PointerCaptureLost(object sender, PointerCaptureLostEventArgs e)
+    private void StepsList_PointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
     {
         EndDrag(null);
     }

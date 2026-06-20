@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using LoupixDeck.Models.Macros;
+using LoupixDeck.Native;
 
 namespace LoupixDeck.Services.Mouse;
 
@@ -26,12 +27,6 @@ public class WindowsVirtualMouse : IVirtualMouse
     private const uint MOUSEEVENTF_ABSOLUTE = 0x8000;
 
     private const int WHEEL_DELTA = 120;
-
-    // Virtual screen metrics (multi-monitor desktop bounding box).
-    private const int SM_XVIRTUALSCREEN = 76;
-    private const int SM_YVIRTUALSCREEN = 77;
-    private const int SM_CXVIRTUALSCREEN = 78;
-    private const int SM_CYVIRTUALSCREEN = 79;
 
     [StructLayout(LayoutKind.Sequential)]
     private struct MOUSEINPUT
@@ -73,9 +68,6 @@ public class WindowsVirtualMouse : IVirtualMouse
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
 
-    [DllImport("user32.dll")]
-    private static extern int GetSystemMetrics(int nIndex);
-
     private static readonly int InputSize = Marshal.SizeOf<INPUT>();
 
     // SendInput requires no setup, so the backend is always available on Windows.
@@ -107,10 +99,10 @@ public class WindowsVirtualMouse : IVirtualMouse
     public void MoveAbsolute(int x, int y)
     {
         // Absolute coordinates are normalized to 0..65535 across the virtual desktop.
-        var left = GetSystemMetrics(SM_XVIRTUALSCREEN);
-        var top = GetSystemMetrics(SM_YVIRTUALSCREEN);
-        var width = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-        var height = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+        var left = User32.SystemMetrics.VirtualScreenLeft;
+        var top = User32.SystemMetrics.VirtualScreenTop;
+        var width = User32.SystemMetrics.VirtualScreenWidth;
+        var height = User32.SystemMetrics.VirtualScreenHeight;
 
         if (width <= 0 || height <= 0)
             return;

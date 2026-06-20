@@ -1,3 +1,4 @@
+#nullable enable
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -105,7 +106,7 @@ public partial class LoupedeckConfig
         }
     } = [];
 
-    private void OnRotaryPagesChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void OnRotaryPagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
         => OnPropertyChanged(nameof(RotaryPageLabel));
 
     [JsonIgnore]
@@ -114,7 +115,7 @@ public partial class LoupedeckConfig
     public partial int CurrentRotaryPageIndex { get; set; } = -1;
 
     [JsonIgnore]
-    public RotaryButtonPage CurrentRotaryButtonPage =>
+    public RotaryButtonPage? CurrentRotaryButtonPage =>
         (RotaryButtonPages != null &&
          CurrentRotaryPageIndex >= 0 &&
          CurrentRotaryPageIndex < RotaryButtonPages.Count)
@@ -148,7 +149,7 @@ public partial class LoupedeckConfig
         }
     } = [];
 
-    private void OnLeftRotaryPagesChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void OnLeftRotaryPagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
         => OnPropertyChanged(nameof(LeftRotaryPageLabel));
 
     public ObservableCollection<RotaryButtonPage> RightRotaryButtonPages
@@ -165,7 +166,7 @@ public partial class LoupedeckConfig
         }
     } = [];
 
-    private void OnRightRotaryPagesChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void OnRightRotaryPagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
         => OnPropertyChanged(nameof(RightRotaryPageLabel));
 
     [JsonIgnore]
@@ -179,7 +180,7 @@ public partial class LoupedeckConfig
     public partial int CurrentRightRotaryPageIndex { get; set; } = -1;
 
     [JsonIgnore]
-    public RotaryButtonPage CurrentLeftRotaryButtonPage =>
+    public RotaryButtonPage? CurrentLeftRotaryButtonPage =>
         (LeftRotaryButtonPages != null &&
          CurrentLeftRotaryPageIndex >= 0 &&
          CurrentLeftRotaryPageIndex < LeftRotaryButtonPages.Count)
@@ -187,7 +188,7 @@ public partial class LoupedeckConfig
             : null;
 
     [JsonIgnore]
-    public RotaryButtonPage CurrentRightRotaryButtonPage =>
+    public RotaryButtonPage? CurrentRightRotaryButtonPage =>
         (RightRotaryButtonPages != null &&
          CurrentRightRotaryPageIndex >= 0 &&
          CurrentRightRotaryPageIndex < RightRotaryButtonPages.Count)
@@ -219,7 +220,7 @@ public partial class LoupedeckConfig
         }
     } = [];
 
-    private void OnTouchPagesChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void OnTouchPagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
         => OnPropertyChanged(nameof(TouchPageLabel));
 
     [JsonIgnore]
@@ -228,7 +229,7 @@ public partial class LoupedeckConfig
     public partial int CurrentTouchPageIndex { get; set; } = -1;
 
     [JsonIgnore]
-    public TouchButtonPage CurrentTouchButtonPage =>
+    public TouchButtonPage? CurrentTouchButtonPage =>
         CurrentTouchPageIndex >= 0 && CurrentTouchPageIndex < TouchButtonPages?.Count
                 ? TouchButtonPages[CurrentTouchPageIndex] : null;
 

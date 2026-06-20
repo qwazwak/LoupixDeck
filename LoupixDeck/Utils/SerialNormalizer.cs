@@ -5,14 +5,15 @@ namespace LoupixDeck.Utils;
 /// <summary>
 /// Normalizes USB iSerialNumber values into a single, platform-uniform identity
 /// token and into a filesystem-safe form for per-device config-file scoping.
-///
+/// </summary>
+/// <remarks>
 /// Windows exposes the serial as the 3rd '\'-segment of the PNPDeviceID. For
 /// devices with a real iSerial that segment is hex-encoded ASCII (e.g. "525A32…"
 /// → "RZ2…"); for devices WITHOUT a real iSerial Windows synthesizes a
 /// location-derived id containing '&amp;' (e.g. "6&amp;1a2b3c&amp;0&amp;2") which must NOT be
 /// treated as a stable serial (it changes per USB port). Linux already yields
 /// decoded ASCII via ID_SERIAL_SHORT, so only the Windows segment needs decoding.
-/// </summary>
+/// </remarks>
 public static class SerialNormalizer
 {
     private const int MaxFilenameLength = 48;

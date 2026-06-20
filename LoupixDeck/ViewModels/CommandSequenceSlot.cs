@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using LoupixDeck.Models;
 using LoupixDeck.Services;
 using LoupixDeck.Services.Commands;
@@ -13,11 +14,12 @@ namespace LoupixDeck.ViewModels;
 /// pipeline strip of editable <see cref="CommandSegment"/> chips. The raw, persisted
 /// command string is the source of truth and is read/written through the supplied
 /// delegates; this collection is a view over it that is recomposed on every edit.
-///
+/// </summary>
+/// <remarks>
 /// Mirrors the command-chain logic of <c>TouchButtonSettingsViewModel</c> but is
 /// self-contained so several slots can coexist in a single editor dialog.
-/// </summary>
-public class CommandSequenceSlot : ViewModelBase
+/// </remarks>
+public partial class CommandSequenceSlot : ViewModelBase
 {
     private readonly ICommandBuilder _commandBuilder;
     private readonly ICommandRegistry _commandRegistry;
@@ -30,7 +32,7 @@ public class CommandSequenceSlot : ViewModelBase
     /// <summary>The slot's command chain as individual, editable chips.</summary>
     public ObservableCollection<CommandSegment> Commands { get; } = [];
 
-    public ICommand ClearCommandCommand { get; }
+    public IRelayCommand ClearCommandCommand => field ??= Relay.Create(ClearCommandOnly);
 
     public CommandSequenceSlot(
         string title,
@@ -45,23 +47,17 @@ public class CommandSequenceSlot : ViewModelBase
         _read = read;
         _write = write;
 
-        ClearCommandCommand = new RelayCommand(ClearCommandOnly);
-
         // Keep the 1-based chip numbers in sync with the collection.
         Commands.CollectionChanged += (_, _) => RenumberSegments();
 
         LoadSegments();
     }
 
-    private bool _isActive;
-
     /// <summary>True when this slot is the target for double-click-to-append from
     /// the command tree. Exactly one slot is active at a time in the editor.</summary>
-    public bool IsActive
-    {
-        get => _isActive;
-        set => SetProperty(ref _isActive, value);
-    }
+
+    [ObservableProperty]
+    public partial bool IsActive { get; set; }
 
     /// <summary>True when the slot has a non-empty command assigned.</summary>
     public bool HasCommand => !string.IsNullOrWhiteSpace(_read());
@@ -87,7 +83,7 @@ public class CommandSequenceSlot : ViewModelBase
         return segment;
     }
 
-    private void OnSegmentChanged(object sender, EventArgs e) => RebuildCommandString();
+    private void OnSegmentChanged(object? sender, EventArgs e) => RebuildCommandString();
 
     private void RenumberSegments()
     {

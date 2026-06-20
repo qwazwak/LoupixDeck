@@ -1,60 +1,43 @@
 using LoupixDeck.PluginSdk;
+using System.Collections.Immutable;
 
 namespace LoupixDeck.Services.Commands;
 
 /// <inheritdoc cref="ICommandRegistry"/>
-public class CommandRegistry : ICommandRegistry
+public class CommandRegistry(IEnumerable<ICommandProvider> providers) : ICommandRegistry
 {
-    private readonly IEnumerable<ICommandProvider> _providers;
-
     // Immutable, copy-on-write map. Initialize() builds a fresh dictionary and
-    // publishes it via a single volatile reference swap, so a runtime rebuild
+    // publishes it via a single reference swap, so a runtime rebuild
     // (plugin hot-reload) can never tear a read on a device input thread —
     // readers take a local copy of the reference and an in-flight Execute keeps
     // running against the snapshot it already captured.
-    private volatile IReadOnlyDictionary<string, RegisteredCommand> _commands =
-        new Dictionary<string, RegisteredCommand>(StringComparer.Ordinal);
+    private volatile ImmutableDictionary<string, RegisteredCommand> _commands = ImmutableDictionary<string, RegisteredCommand>.Empty.WithComparers(StringComparer.Ordinal);
 
-    public CommandRegistry(IEnumerable<ICommandProvider> providers)
+    public void Initialize() => _commands = CreateInitial(providers); // atomic publish
+
+    private static ImmutableDictionary<string, RegisteredCommand> CreateInitial(IEnumerable<ICommandProvider> providers)
     {
-        _providers = providers;
-    }
-
-    public void Initialize()
-    {
-        var next = new Dictionary<string, RegisteredCommand>(StringComparer.Ordinal);
-
-        foreach (var provider in _providers)
+        static IList<RegisteredCommand> EnumerateFromProvider(ICommandProvider provider)
         {
-            List<RegisteredCommand> commands;
             try
             {
-                commands = provider.GetCommands().ToList();
+                return provider.GetCommands().ToList();
             }
             catch (Exception ex)
             {
                 // A faulty provider (e.g. a misbehaving plugin) must not take
                 // down the whole registry.
                 Console.WriteLine($"CommandRegistry: provider '{provider.GetType().Name}' failed: {ex.Message}");
-                continue;
-            }
-
-            foreach (var command in commands)
-            {
-                if (command == null || string.IsNullOrEmpty(command.CommandName))
-                    continue;
-
-                next[command.CommandName] = command;
+                return Array.Empty<RegisteredCommand>();
             }
         }
 
-        _commands = next; // atomic publish
+        return providers.SelectMany(EnumerateFromProvider)
+               .Where(static c => !string.IsNullOrEmpty(c?.CommandName))
+               .ToImmutableDictionary(static c => c.CommandName, StringComparer.Ordinal);
     }
 
-    public bool Contains(string commandName)
-    {
-        return !string.IsNullOrEmpty(commandName) && _commands.ContainsKey(commandName);
-    }
+    public bool Contains(string commandName) => !string.IsNullOrEmpty(commandName) && _commands.ContainsKey(commandName);
 
     public RegisteredCommand Get(string commandName)
     {
