@@ -415,6 +415,9 @@ internal static partial class User32
     [LibraryImport("USER32.dll", EntryPoint = "MapVirtualKeyW"), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     public static partial uint MapVirtualKey(uint uCode, MAP_VIRTUAL_KEY_TYPE uMapType);
 
+    public static uint MapVirtualScanCodeToVirtualKeyEx(uint uCode) => MapVirtualKey(uCode, MAP_VIRTUAL_KEY_TYPE.MAPVK_VSC_TO_VK_EX);
+    public static ushort MapVirtualKeyToToVirtualScanCode(uint uCode) => (ushort)MapVirtualKey(uCode, MAP_VIRTUAL_KEY_TYPE.MAPVK_VK_TO_VSC);
+
     /// <summary>Retrieves the active input locale identifier (formerly called the keyboard layout).</summary>
     /// <param name="idThread">
     /// <para>Type: <b>DWORD</b> The identifier of the thread to query, or 0 for the current thread.</para>

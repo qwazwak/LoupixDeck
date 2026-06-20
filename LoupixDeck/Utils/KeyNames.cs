@@ -68,7 +68,7 @@ public static class KeyNames
     // Canonical name -> Windows virtual-key code (VK_*) + extended-key flag.
     // Extended keys (right ctrl/alt, Win/Apps, navigation block, arrows) require
     // KEYEVENTF_EXTENDEDKEY when sent via SendInput.
-    private static readonly FrozenDictionary<string, (uint virtualKey, bool extended)> Windows = new Dictionary<string, (uint virtualKey, bool extended)>(StringComparer.OrdinalIgnoreCase)
+    private static readonly FrozenDictionary<string, (ushort virtualKey, bool extended)> Windows = new Dictionary<string, (ushort virtualKey, bool extended)>(StringComparer.OrdinalIgnoreCase)
         {
             // Modifiers
             ["ctrl"] = (0x11, false),   // VK_CONTROL
@@ -232,7 +232,7 @@ public static class KeyNames
     }
 
     /// <summary>Resolves a key name to its Windows virtual-key code (VK_*) and extended flag.</summary>
-    public static bool TryGetWindows(string name, out uint virtualKey, out bool extended)
+    public static bool TryGetWindows(string name, out ushort virtualKey, out bool extended)
     {
         if (Windows.TryGetValue(Normalize(name), out var entry))
         {

@@ -8,7 +8,7 @@ namespace LoupixDeck.Services;
 /// otherwise the SendInput backend. The decision is made per call from the live config,
 /// so toggling Interception in the settings takes effect immediately (no app restart).
 /// </summary>
-public class WindowsKeyboardRouter(
+public sealed class WindowsKeyboardRouter(
     WindowsUInputKeyboard sendInput,
     InterceptionKeyboard interception,
     LoupedeckConfig config) : IUInputKeyboard
@@ -22,7 +22,13 @@ public class WindowsKeyboardRouter(
             ? interception
             : sendInput;
 
+#if IUInputKeyboard_SEND_KEY
+#if IUInputKeyboard_SEND_KEY_UINT
     public void SendKey(uint keyCode) => Active.SendKey(keyCode);
+#else
+    public void SendKey(ushort keyCode) => Active.SendKey(keyCode);
+#endif
+#endif
 
     public void SendText(string text) => Active.SendText(text);
 

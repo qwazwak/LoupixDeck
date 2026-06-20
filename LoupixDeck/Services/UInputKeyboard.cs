@@ -1,9 +1,10 @@
 #nullable enable
+using System.Buffers;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 using LoupixDeck.Models;
 using LoupixDeck.Native;
+using LoupixDeck.Native.Types.Windows;
 using LoupixDeck.Utils;
 // ReSharper disable CollectionNeverQueried.Local
 // ReSharper disable UnusedMember.Local
@@ -14,11 +15,17 @@ public interface IUInputKeyboard : IDisposable
 {
     public bool Connected { get; }
 
+#if IUInputKeyboard_SEND_KEY
     /// <summary>
     /// Sends a single keycode as a key press and release.
     /// </summary>
     /// <param name="keyCode">Linux key code (e.g. 30 = KEY_A).</param>
+#if IUInputKeyboard_SEND_KEY_UINT
     void SendKey(uint keyCode);
+#else
+    void SendKey(ushort keyCode);
+#endif
+#endif
 
     /// <summary>
     /// Sends a complete text, letter by letter.
@@ -97,11 +104,14 @@ public sealed class UInputKeyboard : IUInputKeyboard
         });
     }
 
+#if IUInputKeyboard_SEND_KEY
+#if IUInputKeyboard_SEND_KEY_UINT
     void IUInputKeyboard.SendKey(uint keyCode)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(keyCode, ushort.MaxValue);
         SendKey((ushort)keyCode);
     }
+#endif
 
     /// <summary>
     /// Sends a single keycode (press + release).
@@ -114,6 +124,7 @@ public sealed class UInputKeyboard : IUInputKeyboard
         uinputNative.PressKey(keyCode);
         uinputNative.ReleaseKey(keyCode);
     }
+#endif
 
     /// <summary>
     /// Sends a complete text (simplified, only a-z, A-Z, spaces).
@@ -246,75 +257,34 @@ public sealed class UInputKeyboard : IUInputKeyboard
 /// (some games / anti-cheat) may ignore them — that is a fundamental limit of any
 /// user-mode injection and cannot be bypassed without a kernel driver.
 /// </remarks>
-public partial class WindowsUInputKeyboard : IUInputKeyboard
+public sealed class WindowsUInputKeyboard : IUInputKeyboard
 {
-    private const int INPUT_KEYBOARD = 1;
-
-    private const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
-    private const uint KEYEVENTF_KEYUP = 0x0002;
-    private const uint KEYEVENTF_UNICODE = 0x0004;
-
-    private const uint MAPVK_VK_TO_VSC = 0;
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct KEYBDINPUT
-    {
-        public ushort wVk;
-        public ushort wScan;
-        public uint dwFlags;
-        public uint time;
-        public IntPtr dwExtraInfo;
-    }
-
-    // Only the keyboard variant is used, but the union must be sized to the largest
-    // member (MOUSEINPUT) so Marshal.SizeOf<INPUT>() matches the size SendInput expects.
-    [StructLayout(LayoutKind.Sequential)]
-    private struct MOUSEINPUT
-    {
-        public int dx;
-        public int dy;
-        public uint mouseData;
-        public uint dwFlags;
-        public uint time;
-        public IntPtr dwExtraInfo;
-    }
-
-    [StructLayout(LayoutKind.Explicit)]
-    private struct INPUTUNION
-    {
-        [FieldOffset(0)] public MOUSEINPUT mi;
-        [FieldOffset(0)] public KEYBDINPUT ki;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct INPUT
-    {
-        public uint type;
-        public INPUTUNION u;
-    }
-
-    [LibraryImport("user32.dll", SetLastError = true)]
-    private static partial uint SendInput(uint nInputs, ReadOnlySpan<INPUT> pInputs, int cbSize);
-
-    [DllImport("user32.dll")]
-    private static extern uint MapVirtualKey(uint uCode, uint uMapType);
-
-    private static readonly int InputSize = Marshal.SizeOf<INPUT>();
+    private const int MaxStackAllocLengthHalf = 64;
 
     // SendInput requires no setup, so the backend is always available on Windows.
-    public bool Connected { get; set; } = true;
+    public bool Connected => true;
 
-    public void SendKey(uint keyCode)
+#if IUInputKeyboard_SEND_KEY
+#if IUInputKeyboard_SEND_KEY_UINT
+    void IUInputKeyboard.SendKey(uint keyCode)
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(keyCode, ushort.MaxValue);
+        SendKey((ushort)keyCode);
+    }
+#endif
+
+    public void SendKey(ushort keyCode)
     {
         if (!Connected)
             return;
 
         // keyCode is treated as a virtual-key code (interface compatibility).
-        Send([
-            KeyInput(keyCode, false, false),
-            KeyInput(keyCode, false, true)
+        User32.Input.SendInput([
+            KEYBDINPUT.Create.KeyInput(keyCode, false, false),
+            KEYBDINPUT.Create.KeyInput(keyCode, false, true)
         ]);
     }
+#endif
 
     public void SendText(string text)
     {
@@ -323,15 +293,25 @@ public partial class WindowsUInputKeyboard : IUInputKeyboard
 
         // Unicode injection: send each UTF-16 code unit directly, independent of the
         // active keyboard layout (handles umlauts, accents, emoji, ...).
-        var inputs = new INPUT[text.Length * 2];
-        var i = 0;
-        foreach (var c in text)
-        {
-            inputs[i++] = UnicodeInput(c, false);
-            inputs[i++] = UnicodeInput(c, true);
-        }
 
-        Send(inputs);
+        INPUT[]? rented = null;
+        Span<INPUT> inputs = text.Length <= MaxStackAllocLengthHalf ? stackalloc INPUT[text.Length * 2] : (rented = ArrayPool<INPUT>.Shared.Rent(text.Length * 2)).AsSpan(0, text.Length * 2);
+        try
+        {
+            var i = 0;
+            foreach (var c in text)
+            {
+                inputs[i++] = KEYBDINPUT.Create.UnicodeInput(c, false);
+                inputs[i++] = KEYBDINPUT.Create.UnicodeInput(c, true);
+            }
+
+            User32.Input.SendInput(inputs);
+        }
+        finally
+        {
+            if (rented is not null)
+                ArrayPool<INPUT>.Shared.Return(rented);
+        }
     }
 
     public void SendKeyCombination(IReadOnlyList<string> keyNames)
@@ -339,7 +319,7 @@ public partial class WindowsUInputKeyboard : IUInputKeyboard
         if (!Connected || keyNames == null || keyNames.Count == 0)
             return;
 
-        var keys = new List<(uint virtualKey, bool extended)>(keyNames.Count);
+        var keys = new List<(ushort virtualKey, bool extended)>(keyNames.Count);
         foreach (var name in keyNames)
         {
             if (KeyNames.TryGetWindows(name, out var virtualKey, out var extended))
@@ -352,15 +332,24 @@ public partial class WindowsUInputKeyboard : IUInputKeyboard
             return;
 
         // Press all keys in order, then release them in reverse order.
-        var inputs = new INPUT[keys.Count * 2];
-        var i = 0;
-        foreach (var (virtualKey, extended) in keys)
-            inputs[i++] = KeyInput(virtualKey, extended, false);
+        INPUT[]? rented = null;
+        Span<INPUT> inputs = keys.Count <= MaxStackAllocLengthHalf ? stackalloc INPUT[keys.Count * 2] : (rented = ArrayPool<INPUT>.Shared.Rent(keys.Count * 2)).AsSpan(0, keys.Count * 2);
+        try
+        {
+            var i = 0;
+            foreach (var (virtualKey, extended) in keys)
+                inputs[i++] = KEYBDINPUT.Create.KeyInput(virtualKey, extended, false);
 
-        for (var k = keys.Count - 1; k >= 0; k--)
-            inputs[i++] = KeyInput(keys[k].virtualKey, keys[k].extended, true);
+            for (var k = keys.Count - 1; k >= 0; k--)
+                inputs[i++] = KEYBDINPUT.Create.KeyInput(keys[k].virtualKey, keys[k].extended, true);
 
-        Send(inputs);
+            User32.Input.SendInput(inputs);
+        }
+        finally
+        {
+            if (rented is not null)
+                ArrayPool<INPUT>.Shared.Return(rented);
+        }
     }
 
     public void KeyDown(string keyName)
@@ -379,7 +368,7 @@ public partial class WindowsUInputKeyboard : IUInputKeyboard
             return;
 
         if (KeyNames.TryGetWindows(keyName, out var virtualKey, out var extended))
-            Send([KeyInput(virtualKey, extended, up)]);
+            User32.Input.SendInput([KEYBDINPUT.Create.KeyInput(virtualKey, extended, up)]);
         else
             Console.Error.WriteLine($"[WindowsUInputKeyboard] Unknown key name: '{keyName}'");
     }
@@ -387,54 +376,5 @@ public partial class WindowsUInputKeyboard : IUInputKeyboard
     public void Dispose()
     {
         // Nothing to dispose — SendInput holds no resources.
-    }
-
-    private static INPUT KeyInput(uint virtualKey, bool extended, bool up)
-    {
-        var flags = 0u;
-        if (extended) flags |= KEYEVENTF_EXTENDEDKEY;
-        if (up) flags |= KEYEVENTF_KEYUP;
-
-        return new INPUT
-        {
-            type = INPUT_KEYBOARD,
-            u = new INPUTUNION
-            {
-                ki = new KEYBDINPUT
-                {
-                    wVk = (ushort)virtualKey,
-                    wScan = (ushort)MapVirtualKey((uint)virtualKey, MAPVK_VK_TO_VSC),
-                    dwFlags = flags
-                }
-            }
-        };
-    }
-
-    private static INPUT UnicodeInput(char c, bool up)
-    {
-        var flags = KEYEVENTF_UNICODE;
-        if (up) flags |= KEYEVENTF_KEYUP;
-
-        return new INPUT
-        {
-            type = INPUT_KEYBOARD,
-            u = new INPUTUNION
-            {
-                ki = new KEYBDINPUT
-                {
-                    wVk = 0,
-                    wScan = c,
-                    dwFlags = flags
-                }
-            }
-        };
-    }
-
-    private static void Send(ReadOnlySpan<INPUT> inputs)
-    {
-        if (inputs.Length == 0)
-            return;
-
-        SendInput((uint)inputs.Length, inputs, InputSize);
     }
 }

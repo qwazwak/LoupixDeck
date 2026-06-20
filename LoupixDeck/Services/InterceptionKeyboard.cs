@@ -19,11 +19,14 @@ public class InterceptionKeyboard() : InterceptionBase(InterceptionContext.Keybo
 
     private readonly KeyboardLayout _layout = KeyboardLayouts.GetLayout(GetCurrentKeyboardLayout());
 
+#if IUInputKeyboard_SEND_KEY
+#if IUInputKeyboard_SEND_KEY_UINT
     void IUInputKeyboard.SendKey(uint keyCode)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(keyCode, ushort.MaxValue);
         SendKey((ushort)keyCode);
     }
+#endif
 
     public void SendKey(ushort keyCode)
     {
@@ -35,6 +38,7 @@ public class InterceptionKeyboard() : InterceptionBase(InterceptionContext.Keybo
             SendStrokeVerified(keyCode, false, down: false);
         }
     }
+#endif
 
     public void SendText(string text)
     {
@@ -116,7 +120,7 @@ public class InterceptionKeyboard() : InterceptionBase(InterceptionContext.Keybo
     private void SendStrokeVerified(ushort code, bool e0, bool down)
     {
         // Resolve the VK that win32k will track for this scan code. 0 = no mapping.
-        var vk = User32.MapVirtualKey(e0 ? 0xE000u | code : code, User32.MAP_VIRTUAL_KEY_TYPE.MAPVK_VSC_TO_VK_EX);
+        var vk = User32.MapVirtualScanCodeToVirtualKeyEx(e0 ? 0xE000u | code : code);
 
         ushort state = down ? StateKeyDown : StateKeyUp;
         if (e0) state |= KeyE0;
