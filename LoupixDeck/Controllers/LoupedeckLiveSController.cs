@@ -59,9 +59,9 @@ public partial class LoupedeckLiveSController(
     // disposed when navigating away / the device is taken over. The provider+page the
     // session was created for are tracked so an idempotent refresh doesn't recreate it,
     // while a real page or binding change does.
-    private readonly ISideStripSession[] _stripSession = new ISideStripSession[2];
-    private readonly ISideStripProvider[] _stripProvider = new ISideStripProvider[2];
-    private readonly RotaryButtonPage[] _stripPage = new RotaryButtonPage[2];
+    private readonly ISideStripSession?[] _stripSession = new ISideStripSession[2];
+    private readonly ISideStripProvider?[] _stripProvider = new ISideStripProvider[2];
+    private readonly RotaryButtonPage?[] _stripPage = new RotaryButtonPage[2];
     private readonly SemaphoreSlim[] _stripRedrawGate = [new(1, 1), new(1, 1)];
     private readonly long[] _stripRedrawGen = new long[2];
     private readonly long[] _stripDrawnGen = new long[2];
@@ -74,10 +74,10 @@ public partial class LoupedeckLiveSController(
     // override session above so swipe stays default paging in segmented mode (only tap is
     // routed to the segment session). Rebuilt when the page object or the rotaries' command
     // bindings change (an editor edit), detected via _segmentBindingSig.
-    private readonly ISideStripSession[] _segmentSession = new ISideStripSession[2];
-    private readonly ISegmentStripProvider[] _segmentProvider = new ISegmentStripProvider[2];
-    private readonly RotaryButtonPage[] _segmentPage = new RotaryButtonPage[2];
-    private readonly string[] _segmentBindingSig = new string[2];
+    private readonly ISideStripSession?[] _segmentSession = new ISideStripSession[2];
+    private readonly ISegmentStripProvider?[] _segmentProvider = new ISegmentStripProvider[2];
+    private readonly RotaryButtonPage?[] _segmentPage = new RotaryButtonPage[2];
+    private readonly string?[] _segmentBindingSig = new string[2];
 
     private static int SideIndex(RotarySide side) => side == RotarySide.Right ? 1 : 0;
 
@@ -199,8 +199,9 @@ public partial class LoupedeckLiveSController(
         await RedrawSideStrips();
     }
 
-    public async Task Initialize(string port = null, int baudrate = 0)
+    public async Task Initialize(string? port = null, int baudrate = 0)
     {
+
         if (port != null)
             Config.DevicePort = port;
 
@@ -791,7 +792,7 @@ public partial class LoupedeckLiveSController(
 
     /// <summary>True when the side's current page is PluginOverride and a session is
     /// active; outputs the session for input routing.</summary>
-    private bool IsPluginStripActive(RotarySide side, out ISideStripSession session)
+    private bool IsPluginStripActive(RotarySide side, out ISideStripSession? session)
     {
         session = null;
         if (deviceService.Device?.HasSideStrips != true || side == RotarySide.Both) return false;
@@ -1355,8 +1356,8 @@ public partial class LoupedeckLiveSController(
             : BitmapHelper.RenderEmptyFolderSlot(config, slot, 90, 90, FolderConstants.Columns);
 
     // --- DirtyTiles bookkeeping -------------------------------------------------
-    private PluginSdk.IExclusiveModeProvider _dirtyOwner;
-    private TileSig?[] _dirtyKeys;
+    private PluginSdk.IExclusiveModeProvider? _dirtyOwner;
+    private TileSig?[]? _dirtyKeys;
 
     private void ResetDirtyTiles()
     {

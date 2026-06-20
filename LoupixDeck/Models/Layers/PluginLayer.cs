@@ -21,7 +21,7 @@ public class PluginLayer : LayerBase
     /// <summary>Device-pixel frame size the image is fitted into (90×90 button).</summary>
     private const double DeviceBaseSize = 90.0;
 
-    private SKBitmap _renderedBitmap;
+    private SKBitmap? _renderedBitmap;
 
     // A bitmap just replaced as RenderedBitmap may still be read by an in-flight render
     // (device push / editor preview) that captured the reference around the swap. Disposing
@@ -35,7 +35,7 @@ public class PluginLayer : LayerBase
     /// poll after a config load. Old bitmaps are retired/disposed under the Skia render gate.
     /// </summary>
     [JsonIgnore]
-    public SKBitmap RenderedBitmap
+    public SKBitmap? RenderedBitmap
     {
         get => _renderedBitmap;
         set

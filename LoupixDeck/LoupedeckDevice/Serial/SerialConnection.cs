@@ -41,7 +41,7 @@ public class SerialConnection : ISerialConnection
     /// <summary>
     /// SerialPort instance used for communication.
     /// </summary>
-    private SerialPort _serialPort;
+    private SerialPort? _serialPort;
 
     /// <summary>
     /// Thread that continuously reads incoming data.

@@ -50,10 +50,10 @@ public partial class LoupedeckLiveSController
         public double LastMs;    // timestamp of the last sample (for velocity)
         public int LastY;        // y of the last sample
         public double Velocity;  // smoothed signed px/ms (negative = upward)
-        public SKBitmap Current; // pre-rendered current page
-        public SKBitmap Next;    // pre-rendered page below (paged to on an up-swipe)
-        public SKBitmap Prev;    // pre-rendered page above (paged to on a down-swipe)
-        public CancellationTokenSource SettleCts;
+        public SKBitmap? Current; // pre-rendered current page
+        public SKBitmap? Next;    // pre-rendered page below (paged to on an up-swipe)
+        public SKBitmap? Prev;    // pre-rendered page above (paged to on a down-swipe)
+        public CancellationTokenSource? SettleCts;
     }
 
     private readonly StripDragState[] _drag = [new(), new()];

@@ -24,8 +24,8 @@ public partial class WallpaperSlot
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasImage))]
-    public partial string AssetPath { get; set; }
-    partial void OnAssetPathChanged(string value) => Invalidate();
+    public partial string? AssetPath { get; set; }
+    partial void OnAssetPathChanged(string? value) => Invalidate();
 
     [ObservableProperty]
     public partial int Scaling { get; set; } = 100;
@@ -68,7 +68,7 @@ public partial class WallpaperSlot
     /// computed lazily via <see cref="BitmapHelper.GetOrBakeSlot"/>.
     /// </summary>
     [JsonIgnore]
-    public SKBitmap Baked { get; set; }
+    public SKBitmap? Baked { get; set; }
 
     [JsonIgnore]
     public bool HasImage => !string.IsNullOrWhiteSpace(AssetPath);

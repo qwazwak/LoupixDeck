@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json;
 
@@ -41,16 +40,6 @@ public abstract partial class MacroStep
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ValueText))]
     public partial bool IsDragging { get; set; }
-
-    /// <summary>
-    /// Raises change notifications for a data property AND the derived <see cref="ValueText"/>,
-    /// so the panel summary updates live while the user edits inline.
-    /// </summary>
-    protected void OnValueChanged([CallerMemberName] string propertyName = null)
-    {
-        OnPropertyChanged(propertyName);
-        OnPropertyChanged(nameof(ValueText));
-    }
 
     /// <summary>Renders an MDI codepoint as a glyph string.</summary>
     protected static string Glyph(int codepoint) => char.ConvertFromUtf32(codepoint);

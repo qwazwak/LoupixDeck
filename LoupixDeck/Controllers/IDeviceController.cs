@@ -19,7 +19,7 @@ public interface IDeviceController
     /// </summary>
     bool IsDeviceOff { get; }
 
-    Task Initialize(string port = null, int baudrate = 0);
+    Task Initialize(string? port = null, int baudrate = 0);
     void SaveConfig();
 
     /// <summary>

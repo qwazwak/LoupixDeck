@@ -225,7 +225,7 @@ public class PlayVideoCommand(IDeviceService deviceService, IExclusiveModeServic
 {
     // Shared so a second press stops playback. ffmpeg must be on PATH.
     private static readonly Lock Gate = new();
-    private static CancellationTokenSource _cts;
+    private static CancellationTokenSource? _cts;
 
     private enum VideoMode
     {

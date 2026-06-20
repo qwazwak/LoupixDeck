@@ -23,7 +23,7 @@ public class AssetService : IAssetService
         Directory.CreateDirectory(AssetsRoot);
     }
 
-    public string Import(string sourcePath, string subFolder = null)
+    public string? Import(string sourcePath, string? subFolder = null)
     {
         if (string.IsNullOrWhiteSpace(sourcePath) || !File.Exists(sourcePath))
             return null;
@@ -64,7 +64,7 @@ public class AssetService : IAssetService
         return (relativeDir + "/" + targetFileName).Replace('\\', '/');
     }
 
-    public SKBitmap Load(string relativePath)
+    public SKBitmap? Load(string relativePath)
     {
         if (string.IsNullOrWhiteSpace(relativePath)) return null;
 
@@ -156,7 +156,7 @@ public class AssetService : IAssetService
     private static string NormalizeRelative(string relativePath)
     {
         var normalized = relativePath.Replace('\\', '/').Trim();
-        var prefix = AssetsFolderName + "/";
+        const string prefix = AssetsFolderName + "/";
         if (!normalized.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             normalized = prefix + normalized.TrimStart('/');
         return normalized;

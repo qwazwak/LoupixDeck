@@ -1,5 +1,6 @@
 using LoupixDeck.Commands.Base;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace LoupixDeck.Services;
@@ -39,7 +40,7 @@ public interface ISysCommandService
     /// <summary>
     /// Looks up the implementation type for a registered command name.
     /// </summary>
-    bool TryGetCommandType(string commandName, out Type type);
+    bool TryGetCommandType(string commandName, [NotNullWhen(true), MaybeNullWhen(false)] out Type type);
 }
 
 public class SysCommandService : ISysCommandService
@@ -100,7 +101,7 @@ public class SysCommandService : ISysCommandService
         return _commands.ContainsKey(commandName);
     }
 
-    public bool TryGetCommandType(string commandName, out Type type)
+    public bool TryGetCommandType(string commandName, [NotNullWhen(true), MaybeNullWhen(false)] out Type? type)
     {
         if (_commands.TryGetValue(commandName, out var entry))
         {

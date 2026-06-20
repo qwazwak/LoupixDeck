@@ -45,8 +45,8 @@ public sealed class DynamicTextManager : IDynamicTextManager, IDisposable
 
     private readonly Lock _gate = new();
     private List<Entry> _active = new();
-    private CancellationTokenSource _cts;
-    private PeriodicTimer _timer;
+    private CancellationTokenSource? _cts;
+    private PeriodicTimer? _timer;
     private Task _loopTask;
 
     public DynamicTextManager(

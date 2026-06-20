@@ -4,11 +4,11 @@ public sealed class FolderNavigationService : IFolderNavigationService
 {
     private readonly Stack<IFolderProvider> _stack = new();
     private Dictionary<int, FolderEntry> _currentEntries = new();
-    private IFolderProvider _activeProvider;
+    private IFolderProvider? _activeProvider;
 
     public bool IsActive => _stack.Count > 0;
 
-    public IFolderProvider CurrentProvider => _activeProvider;
+    public IFolderProvider? CurrentProvider => _activeProvider;
 
     public IReadOnlyDictionary<int, FolderEntry> CurrentEntries => _currentEntries;
 

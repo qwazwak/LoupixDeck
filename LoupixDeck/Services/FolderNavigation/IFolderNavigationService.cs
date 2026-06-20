@@ -5,7 +5,7 @@ public interface IFolderNavigationService
     bool IsActive { get; }
 
     /// <summary>The provider on top of the navigation stack, or null when not active.</summary>
-    IFolderProvider CurrentProvider { get; }
+    IFolderProvider? CurrentProvider { get; }
 
     /// <summary>Cached entries of the current provider, keyed by SlotIndex for fast touch dispatch.</summary>
     IReadOnlyDictionary<int, FolderEntry> CurrentEntries { get; }

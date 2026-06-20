@@ -47,9 +47,9 @@ public partial class TouchButtonSettings : Window
 
     // Command-card currently reordered via its drag handle; null when idle. The
     // owning chip list + slot are captured so a reorder targets the right segment.
-    private CommandSegment _draggedSegment;
-    private ItemsControl _dragList;
-    private CommandSequenceSlot _dragSlot;
+    private CommandSegment? _draggedSegment;
+    private ItemsControl? _dragList;
+    private CommandSequenceSlot? _dragSlot;
     private Point _segmentDragStart;
     private bool _segmentDragging;
 
@@ -230,7 +230,7 @@ public partial class TouchButtonSettings : Window
     private void CommandList_PointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
         => EndCommandDrag(null);
 
-    private void EndCommandDrag(IPointer pointer)
+    private void EndCommandDrag(IPointer? pointer)
     {
         if (_draggedSegment == null)
             return;

@@ -2,6 +2,8 @@ using LoupixDeck.PluginSdk;
 using LoupixDeck.Registry;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using SdkDeviceInfo = LoupixDeck.PluginSdk.DeviceInfo;
 
 namespace LoupixDeck.Services.Plugins;
@@ -26,10 +28,15 @@ public interface IPluginManager
     /// Loads (or reloads) a single plugin by id at runtime, replacing any existing
     /// entry with the same id. Honours the same enable/platform/SDK gates as the
     /// bulk load, so a disabled plugin yields a <see cref="PluginLoadStatus.Disabled"/>
-    /// entry without creating a load context. UI thread only. Returns the resulting
-    /// <see cref="LoadedPlugin"/>, or null when no manifest is found for the id.
+    /// entry without creating a load context.
     /// </summary>
-    LoadedPlugin LoadPlugin(string pluginId);
+    /// <remarks>
+    /// UI thread only.
+    /// </remarks>
+    /// <returns>
+    /// Returns the resulting <see cref="LoadedPlugin"/>, or null when no manifest is found for the id.
+    /// </returns>
+    LoadedPlugin? LoadPlugin(string pluginId);
 
     /// <summary>
     /// Shuts down and unloads a single plugin by id, dropping it from
@@ -59,7 +66,7 @@ public class PluginManager : IPluginManager
     // Copy-on-write snapshot. Every mutation builds a new list and swaps this
     // reference, so readers (e.g. PluginCommandProvider during a registry rebuild)
     // always see a consistent, immutable list — never a torn mid-mutation state.
-    private volatile IReadOnlyList<LoadedPlugin> _plugins = Array.Empty<LoadedPlugin>();
+    private ImmutableList<LoadedPlugin> _plugins = ImmutableList<LoadedPlugin>.Empty;
 
     public PluginManager(IDeviceRouter router, IDeviceHostRegistry hostRegistry)
     {
@@ -75,11 +82,9 @@ public class PluginManager : IPluginManager
     public IReadOnlyList<LoadedPlugin> Plugins => _plugins;
 
     /// <summary>Builds a new plugin list from the current snapshot and publishes it.</summary>
-    private void ReplacePlugins(Action<List<LoadedPlugin>> mutate)
+    private void ReplacePlugins(Func<ImmutableList<LoadedPlugin>, ImmutableList<LoadedPlugin>> mutate)
     {
-        var next = new List<LoadedPlugin>(_plugins);
-        mutate(next);
-        _plugins = next; // atomic reference swap
+        ImmutableInterlocked.Update(ref _plugins, mutate);
     }
 
     /// <summary>The two discovery roots, app dir first so bundled plugins win.</summary>
@@ -97,7 +102,7 @@ public class PluginManager : IPluginManager
     /// Finds the directory + manifest path for a plugin id across both roots
     /// (app dir wins). Returns false when no manifest with that id exists.
     /// </summary>
-    private static bool TryResolvePluginDir(string pluginId, out string dir, out string manifestPath)
+    private static bool TryResolvePluginDir(string pluginId, [NotNullWhen(true)] out string? dir, [NotNullWhen(true)] out string? manifestPath)
     {
         dir = null;
         manifestPath = null;
@@ -115,7 +120,7 @@ public class PluginManager : IPluginManager
                 if (!File.Exists(candidateManifest))
                     continue;
 
-                string id;
+                string? id;
                 try
                 {
                     id = JsonConvert.DeserializeObject<PluginManifest>(File.ReadAllText(candidateManifest))?.Id;
@@ -139,7 +144,7 @@ public class PluginManager : IPluginManager
 
     public void LoadPlugins()
     {
-        var loadedPlugins = new List<LoadedPlugin>();
+        ImmutableList<LoadedPlugin>.Builder loadedPlugins = ImmutableList.CreateBuilder<LoadedPlugin>();
 
         // Plugins are discovered from two roots: the bundled `plugins/` folder
         // next to the executable, and a user `plugins/` folder alongside the
@@ -202,13 +207,13 @@ public class PluginManager : IPluginManager
             }
         }
 
-        _plugins = loadedPlugins; // single atomic publish
-
-        var ok = loadedPlugins.Count(p => p.Status == PluginLoadStatus.Loaded);
-        Console.WriteLine($"PluginManager: {ok}/{loadedPlugins.Count} plugin(s) loaded.");
+        ImmutableList<LoadedPlugin> plugins = loadedPlugins.ToImmutable(); // single atomic publish
+        _plugins = plugins;
+        var ok = plugins.Count(p => p.Status == PluginLoadStatus.Loaded);
+        Console.WriteLine($"PluginManager: {ok}/{plugins.Count} plugin(s) loaded.");
     }
 
-    public LoadedPlugin LoadPlugin(string pluginId)
+    public LoadedPlugin? LoadPlugin(string pluginId)
     {
         if (!TryResolvePluginDir(pluginId, out var dir, out var manifestPath))
         {
@@ -224,8 +229,8 @@ public class PluginManager : IPluginManager
         var loaded = LoadOne(dir, manifestPath);
         ReplacePlugins(list =>
         {
-            list.RemoveAll(p => string.Equals(p.Manifest?.Id, pluginId, StringComparison.OrdinalIgnoreCase));
-            list.Add(loaded);
+            list = list.RemoveAll(p => string.Equals(p.Manifest?.Id, pluginId, StringComparison.OrdinalIgnoreCase));
+            return list.Add(loaded);
         });
 
         return loaded;
@@ -590,7 +595,7 @@ public class PluginManager : IPluginManager
         return false;
     }
 
-    private static LoadedPlugin Fail(string dir, PluginManifest manifest, string reason)
+    private static LoadedPlugin Fail(string dir, PluginManifest? manifest, string reason)
     {
         Console.WriteLine($"PluginManager: '{manifest?.Id ?? dir}' failed — {reason}");
         return new LoadedPlugin

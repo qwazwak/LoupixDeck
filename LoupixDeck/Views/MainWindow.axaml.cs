@@ -25,7 +25,7 @@ public partial class MainWindow : Window
 
     public MainShellViewModel? ViewModel => DataContext as MainShellViewModel;
 
-    private MainShellViewModel _shell;
+    private MainShellViewModel? _shell;
 
     public MainWindow()
     {

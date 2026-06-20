@@ -37,16 +37,19 @@ public abstract class FileDialogHelper
     /// given (the open settings dialog), falling back to the main window. Returns the
     /// absolute path, an empty string if cancelled, or null when there's no window.
     /// </summary>
-    public static async Task<string> OpenZipDialog(Window owner = null)
+    public static Task<string?> OpenZipDialog(Window? owner = null)
     {
         owner ??= WindowHelper.GetMainWindow();
-        if (owner == null) return null;
+        if (owner == null) return Task.FromResult<string?>(null);
+        return WithOwner(owner);
 
-        var files = await owner.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        static async Task<string?> WithOwner(Window owner)
         {
-            Title = "Select Plugin Package",
-            AllowMultiple = false,
-            FileTypeFilter = new List<FilePickerFileType>
+            var files = await owner.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = "Select Plugin Package",
+                AllowMultiple = false,
+                FileTypeFilter = new List<FilePickerFileType>
             {
                 new("Plugin package")
                 {
@@ -57,11 +60,12 @@ public abstract class FileDialogHelper
                     Patterns = ["*"]
                 }
             }
-        });
+            });
 
-        if (files.Count == 0) return string.Empty;
+            if (files.Count == 0) return string.Empty;
 
-        return Uri.UnescapeDataString(files[0].Path.AbsolutePath);
+            return Uri.UnescapeDataString(files[0].Path.AbsolutePath);
+        }
     }
 
     public static string GetConfigPath(string fileName)

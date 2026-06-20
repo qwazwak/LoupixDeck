@@ -140,7 +140,7 @@ public class MacroManager : IMacroManager
         return !string.IsNullOrWhiteSpace(name) && name.IndexOfAny(ForbiddenNameChars) < 0;
     }
 
-    public bool IsNameValid(string name, Macro ignore = null)
+    public bool IsNameValid(string name, Macro? ignore = null)
     {
         if (!HasValidNameCharacters(name))
             return false;

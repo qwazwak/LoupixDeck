@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Avalonia;
 using Avalonia.Media;
@@ -125,7 +126,7 @@ public static class BitmapHelper
 
                 // 3. Bevel rim: a thin bright top edge fading to a dark bottom edge.
                 //    This alone gives the flat face just enough edge definition.
-                var rimWidth = 1.5f * ss;
+                const float rimWidth = 1.5f * ss;
                 using (var rimShader = SKShader.CreateLinearGradient(
                            new SKPoint(cx, cy - bodyRadius),
                            new SKPoint(cx, cy + bodyRadius),
@@ -156,7 +157,7 @@ public static class BitmapHelper
                 const float gapAngle = 50f;
                 const float startAngle = -45f + (gapAngle / 2f);
                 const float sweepAngle = 360f - gapAngle;
-                var coreWidth = 2.4f * ss;
+                const float coreWidth = 2.4f * ss;
 
                 using var ringPath = new SKPath();
                 ringPath.AddArc(oval, startAngle, sweepAngle);
@@ -580,7 +581,7 @@ public static class BitmapHelper
         return dst;
     }
 
-    private static bool HasAnyWallpaper(TouchButtonPage page) =>
+    private static bool HasAnyWallpaper([NotNullWhen(true)]  TouchButtonPage? page) =>
         page != null &&
         ((page.MainWallpaper?.HasImage ?? false) ||
          (page.LeftWallpaper?.HasImage ?? false) ||
@@ -593,7 +594,7 @@ public static class BitmapHelper
     /// stay empty rather than borrowing from page 0 (so a page that only sets a main
     /// wallpaper does not inherit another page's side wallpapers).
     /// </summary>
-    private static TouchButtonPage ResolveWallpaperSourcePage(LoupedeckConfig config)
+    private static TouchButtonPage? ResolveWallpaperSourcePage(LoupedeckConfig? config)
     {
         var current = config?.CurrentTouchButtonPage;
         if (HasAnyWallpaper(current)) return current;
@@ -606,13 +607,27 @@ public static class BitmapHelper
     /// view. Returns (null, 0) when the source page has no main wallpaper. Shared by the
     /// centre grid and the Razer side strips so they stay in sync.
     /// </summary>
-    private static (SKBitmap wallpaper, double opacity) ResolveWallpaper(LoupedeckConfig config)
+    private static (SKBitmap? wallpaper, double opacity) ResolveWallpaper(LoupedeckConfig? config) => TryResolveWallpaper(config, out var wallpaper, out var opacity) ? (wallpaper, opacity) : (null, 0);
+    private static bool TryResolveWallpaper(LoupedeckConfig? config, out SKBitmap? wallpaper, out double opacity)
     {
         var page = ResolveWallpaperSourcePage(config);
-        if (page == null) return (null, 0);
+        if (page == null)
+        {
+            wallpaper = null;
+            opacity = 0;
+            return false;
+        }
 
         var baked = GetOrBakeSlot(page.MainWallpaper, PanelWidth, PanelHeight);
-        return baked != null ? (baked, page.MainWallpaper.Opacity) : (null, 0);
+        if (baked is not null)
+        {
+            wallpaper = baked;
+            opacity = page.MainWallpaper.Opacity;
+            return true;
+        }
+        wallpaper = null;
+        opacity = 0;
+        return false;
     }
 
     /// <summary>
@@ -1472,7 +1487,7 @@ public static class BitmapHelper
     /// </summary>
     public static SKBitmap RenderFolderEntry(
         Services.FolderNavigation.FolderEntry entry,
-        LoupedeckConfig config,
+        LoupedeckConfig? config,
         int slotIndex,
         int width,
         int height,
@@ -1585,7 +1600,7 @@ public static class BitmapHelper
         int width,
         int height,
         RotarySide side,
-        Func<int, LoupixDeck.PluginSdk.IRenderCanvas, bool> drawSegment = null)
+        Func<int, LoupixDeck.PluginSdk.IRenderCanvas, bool>? drawSegment = null)
     {
         ArgumentNullException.ThrowIfNull(page);
 
@@ -1781,7 +1796,7 @@ public static class BitmapHelper
 
     private static void DrawWallpaperOrColor(
         SKCanvas canvas,
-        LoupedeckConfig config,
+        LoupedeckConfig? config,
         int slotIndex,
         int width,
         int height,

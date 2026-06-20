@@ -33,7 +33,7 @@ public partial class ImageLayer : LayerBase
     partial void OnSourceRectChanging(SerializableRect value) => OnDisplaySizeChanged();
 
     [JsonIgnore]
-    public SKBitmap CachedImage
+    public SKBitmap? CachedImage
     {
         get;
         set

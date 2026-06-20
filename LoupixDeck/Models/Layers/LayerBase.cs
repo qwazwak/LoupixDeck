@@ -30,7 +30,7 @@ public abstract partial class LayerBase
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsCommandOwned))]
-    public partial string OwnerKey { get; set; }
+    public partial string? OwnerKey { get; set; }
 
     /// <summary>
     /// Human-readable name of the owning display command (e.g. for the editor badge/info
@@ -39,7 +39,7 @@ public abstract partial class LayerBase
     /// </summary>
     [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     [ObservableProperty]
-    public partial string CommandName { get; set; }
+    public partial string? CommandName { get; set; }
 
     /// <summary>True when this layer's content is owned by a display command (core or plugin).</summary>
     [JsonIgnore]
@@ -124,12 +124,4 @@ public abstract partial class LayerBase
 
     [JsonIgnore]
     public abstract string LayerKind { get; }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
-    }
 }

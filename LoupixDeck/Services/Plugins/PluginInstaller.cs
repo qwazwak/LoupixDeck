@@ -8,15 +8,15 @@ namespace LoupixDeck.Services.Plugins;
 public sealed class PluginActionResult
 {
     public bool Success { get; init; }
-    public string Message { get; init; }
+    public required string Message { get; init; }
 
     /// <summary>True when the change only fully takes effect after a restart.</summary>
     public bool RequiresRestart { get; init; }
 
     /// <summary>The plugin id the action targeted, when known (for the reload coordinator).</summary>
-    public string PluginId { get; init; }
+    public string? PluginId { get; init; }
 
-    public static PluginActionResult Ok(string message, bool requiresRestart = true, string pluginId = null) =>
+    public static PluginActionResult Ok(string message, bool requiresRestart = true, string? pluginId = null) =>
         new() { Success = true, Message = message, RequiresRestart = requiresRestart, PluginId = pluginId };
 
     public static PluginActionResult Fail(string message) =>

@@ -5,6 +5,7 @@ using LoupixDeck.Services;
 using LoupixDeck.Utils;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LoupixDeck.ViewModels;
 
@@ -65,12 +66,13 @@ public partial class CommandParameter
 public partial class CommandSegment
 {
     private readonly ICommandBuilder _commandBuilder;
-    private readonly CommandInfo _info;
+    private readonly CommandInfo? _info;
 
     /// <summary>Raised whenever the rebuilt command text changes (parameter edit,
     /// shell-text edit). The owning view model recomposes the chained string.</summary>
     public event EventHandler Changed;
 
+    [MemberNotNullWhen(true, nameof(_info))]
     public bool IsKnown => _info != null;
     public string CommandName { get; }
     public string DisplayName { get; }
@@ -79,7 +81,7 @@ public partial class CommandSegment
     /// <summary>The current raw text of this single segment (e.g. <c>"OBS.SetScene(Scene 1)"</c>).</summary>
     public string Raw { get; private set; }
 
-    private CommandSegment(ICommandBuilder commandBuilder, CommandInfo info,
+    private CommandSegment(ICommandBuilder commandBuilder, CommandInfo? info,
         string commandName, string displayName, string raw)
     {
         _commandBuilder = commandBuilder;
@@ -172,7 +174,7 @@ public partial class CommandSegment
 
     /// <summary>Compact secondary text for the collapsed card.</summary>
     public string Summary => IsKnown
-        ? string.Join(", ", Parameters.Select(p => p.Value).Where(v => !string.IsNullOrWhiteSpace(v)))
+        ? string.Join(", ", Parameters.Select(static p => p.Value).Where(static v => !string.IsNullOrWhiteSpace(v)))
         : Raw;
 
     // ───────── UI state (not persisted) ─────────

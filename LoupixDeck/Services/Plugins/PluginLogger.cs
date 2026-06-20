@@ -19,7 +19,7 @@ public sealed class PluginLogger : IPluginLogger
 
     public void Warn(string message) => Console.WriteLine($"{_prefix} WARN: {message}");
 
-    public void Error(string message, Exception exception = null)
+    public void Error(string message, Exception? exception = null)
     {
         Console.WriteLine($"{_prefix} ERROR: {message}");
         if (exception != null)

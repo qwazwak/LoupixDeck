@@ -81,8 +81,8 @@ public partial class App : Application
     /// Build the shared root once, then bring up every device on its own child
     /// provider. The primary device gets the config window; the rest run headless.
     /// </summary>
-    private async Task InitializeDevices(IReadOnlyList<ResolvedDevice> devices, ResolvedDevice primary,
-        string port, int baudRate, IClassicDesktopStyleApplicationLifetime desktop)
+    private async Task InitializeDevices(IReadOnlyList<ResolvedDevice> devices, ResolvedDevice? primary,
+        string? port, int baudRate, IClassicDesktopStyleApplicationLifetime desktop)
     {
         var splashScreen = new SplashScreen();
         desktop.MainWindow = splashScreen;
@@ -102,7 +102,7 @@ public partial class App : Application
             var router = root.GetRequiredService<IDeviceRouter>();
 
             // Pass 1: build every device's child provider and register it.
-            IServiceProvider primaryProvider = null;
+            IServiceProvider? primaryProvider = null;
             foreach (var device in devices)
             {
                 var isPrimary = primary != null && device.ScopeKey == primary.ScopeKey;
@@ -152,7 +152,7 @@ public partial class App : Application
                 }
                 else
                 {
-                    await vm.LoupedeckController.Initialize(null, 0);
+                    await vm.LoupedeckController.Initialize();
                 }
 
                 host.Provider.GetRequiredService<IDynamicTextManager>().Start();

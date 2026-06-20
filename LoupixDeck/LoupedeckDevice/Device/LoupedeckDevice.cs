@@ -14,7 +14,7 @@ namespace LoupixDeck.LoupedeckDevice.Device;
 /// </summary>
 public class LoupedeckDevice
 {
-    private ISerialConnection _connection;
+    private ISerialConnection? _connection;
     private byte _transactionId;
 
     private record QueueItem(
@@ -36,10 +36,10 @@ public class LoupedeckDevice
     private readonly ConcurrentDictionary<byte, CancellationTokenSource> _pendingTimeouts = new();
     private readonly Dictionary<byte, TouchInfo> _touches = new();
 
-    private int ReconnectInterval { get; set; }
-    public string Host { get; set; }
-    private string Path { get; set; }
-    private int Baudrate { get; set; }
+    private int ReconnectInterval { get; }
+    public string? Host { get; }
+    private string? Path { get; }
+    private int Baudrate { get; }
 
     protected Dictionary<string, DisplayInfo> Displays { get; init; } = new();
     public int[] Buttons { get; set; }
@@ -104,7 +104,7 @@ public class LoupedeckDevice
     /// <param name="baudrate">Device Connection Baudrate</param>
     /// <param name="autoConnect">If true, attempts to connect automatically.</param>
     /// <param name="reconnectInterval">Interval (ms) to wait before reconnecting.</param>
-    protected LoupedeckDevice(string host = null, string path = null, int baudrate = 0, bool autoConnect = true,
+    protected LoupedeckDevice(string? host = null, string? path = null, int baudrate = 0, bool autoConnect = true,
         int reconnectInterval = Constants.DefaultReconnectInterval)
     {
         Host = host;
@@ -297,7 +297,7 @@ public class LoupedeckDevice
     /// <param name="command">The command to send to the device.</param>
     /// <param name="data">Optional payload data for the command.</param>
     /// <returns>A task that completes with the device's response payload.</returns>
-    private async Task<byte[]> SendAsync(Constants.Command command, byte[] data = null)
+    private async Task<byte[]> SendAsync(Constants.Command command, byte[]? data = null)
     {
         data ??= [];
 
@@ -325,7 +325,7 @@ public class LoupedeckDevice
     /// <param name="command">The command to send to the device.</param>
     /// <param name="data">Optional payload data for the command.</param>
     /// <returns>A task that completes when the command has been sent.</returns>
-    private async Task SendNoResponseAsync(Constants.Command command, byte[] data = null)
+    private async Task SendNoResponseAsync(Constants.Command command, byte[]? data = null)
     {
         data ??= [];
 
@@ -343,7 +343,7 @@ public class LoupedeckDevice
     /// Sends a command with the given data and waits synchronously for the response.
     /// Frame format: [length (1 byte), command (1 byte), transactionID (1 byte), data]
     /// </summary>
-    private byte[] Send(Constants.Command command, byte[] data = null)
+    private byte[] Send(Constants.Command command, byte[]? data = null)
     {
         return SendAsync(command, data).GetAwaiter().GetResult();
     }
@@ -351,7 +351,7 @@ public class LoupedeckDevice
     /// <summary>
     /// Sends a command with the given data but does not wait for a response.
     /// </summary>
-    private void SendNoResponse(Constants.Command command, byte[] data = null)
+    private void SendNoResponse(Constants.Command command, byte[]? data = null)
     {
         SendNoResponseAsync(command, data).GetAwaiter().GetResult();
     }

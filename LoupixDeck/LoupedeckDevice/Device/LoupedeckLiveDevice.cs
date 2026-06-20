@@ -16,7 +16,7 @@ namespace LoupixDeck.LoupedeckDevice.Device;
 /// </summary>
 public class LoupedeckLiveDevice : RazerStreamControllerDevice
 {
-    public LoupedeckLiveDevice(string host = null, string path = null, int baudrate = 0,
+    public LoupedeckLiveDevice(string? host = null, string? path = null, int baudrate = 0,
         bool autoConnect = true, int reconnectInterval = Constants.DefaultReconnectInterval)
         : base(host, path, baudrate, autoConnect, reconnectInterval)
     {

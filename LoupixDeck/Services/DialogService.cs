@@ -3,12 +3,14 @@ using LoupixDeck.Models;
 using LoupixDeck.Utils;
 using LoupixDeck.ViewModels.Base;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Immutable;
+using System.Diagnostics;
 
 namespace LoupixDeck.Services;
 
 public interface IDialogService
 {
-    Task<DialogResult> ShowDialogAsync<TViewModel, TResult>(Action<TViewModel> initializer = null)
+    Task<DialogResult> ShowDialogAsync<TViewModel, TResult>(Action<TViewModel>? initializer = null)
         where TViewModel : IDialogViewModel;
 
     void Register<TViewModel, TWindow>()
@@ -17,15 +19,15 @@ public interface IDialogService
 
 public class DialogService(IServiceProvider serviceProvider) : IDialogService
 {
-    private readonly Dictionary<Type, Type> _viewModelToWindowMap = new();
+    private ImmutableDictionary<Type, Type> _viewModelToWindowMap = ImmutableDictionary<Type, Type>.Empty;
 
     public void Register<TViewModel, TWindow>()
         where TWindow : Window
     {
-        _viewModelToWindowMap[typeof(TViewModel)] = typeof(TWindow);
+        ImmutableInterlocked.Update(ref _viewModelToWindowMap, static map => map.SetItem(typeof(TViewModel), typeof(TWindow)));
     }
 
-    public async Task<DialogResult> ShowDialogAsync<TViewModel, TResult>(Action<TViewModel> initializer = null)
+    public async Task<DialogResult> ShowDialogAsync<TViewModel, TResult>(Action<TViewModel>? initializer = null)
         where TViewModel : IDialogViewModel
     {
         var viewModel = serviceProvider.GetRequiredService<TViewModel>();
@@ -58,7 +60,9 @@ public class DialogService(IServiceProvider serviceProvider) : IDialogService
             _ = asyncInit.InitializeAsync();
         }
 
-        await window.ShowDialog(WindowHelper.GetMainWindow());
+        Window? mainWindow = WindowHelper.GetMainWindow();
+        Debug.Assert(mainWindow is not null, "Main window should be available when showing a dialog");
+        await window.ShowDialog(mainWindow);
         return await viewModel.DialogResult.Task;
     }
 }

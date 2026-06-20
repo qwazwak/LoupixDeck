@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace LoupixDeck.Utils;
 
+#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
 public static class Relay
 {
     public static IRelayCommand Create(Action execute) => new RelayCommand(execute);

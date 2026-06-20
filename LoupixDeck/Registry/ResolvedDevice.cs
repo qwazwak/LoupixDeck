@@ -13,7 +13,7 @@ namespace LoupixDeck.Registry;
 /// without polluting the type catalog. <see cref="Serial"/> may be null for devices
 /// without a real iSerial; everything then falls back to the slug-only scope.
 /// </remarks>
-public sealed record ResolvedDevice(DeviceRegistry.DeviceInfo Info, string Serial)
+public sealed record ResolvedDevice(DeviceRegistry.DeviceInfo Info, string? Serial)
 {
     public string Slug => Info.Slug;
 

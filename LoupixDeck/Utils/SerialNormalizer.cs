@@ -41,7 +41,7 @@ public static class SerialNormalizer
     /// the result is lowercased and length-capped. Returns null for empty input —
     /// never let a raw serial reach a path.
     /// </summary>
-    public static string? ForFilename(string serial)
+    public static string? ForFilename(string? serial)
     {
         if (string.IsNullOrWhiteSpace(serial)) return null;
 

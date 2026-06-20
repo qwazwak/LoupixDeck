@@ -18,13 +18,13 @@ public interface IAssetService
     /// <paramref name="subFolder"/> to store the asset in a sub-folder of the asset
     /// root (e.g. "wallpapers") so different asset kinds stay separated.
     /// </summary>
-    string Import(string sourcePath, string subFolder = null);
+    string? Import(string sourcePath, string? subFolder = null);
 
     /// <summary>
     /// Loads (and caches) the bitmap for the given relative asset path.
     /// Returns null if the file is missing or unreadable.
     /// </summary>
-    SKBitmap Load(string relativePath);
+    SKBitmap? Load(string relativePath);
 
     /// <summary>
     /// Removes asset files in the asset folder that are not in the provided
