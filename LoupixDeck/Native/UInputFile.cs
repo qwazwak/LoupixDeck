@@ -1,15 +1,8 @@
 #nullable enable
 using LoupixDeck.Native.Types.Linux;
-using LoupixDeck.Utils;
-using LoupixDeck.Views;
-using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
-using System.Xml.Linq;
-using Tmds.DBus.Protocol;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace LoupixDeck.Native;
 

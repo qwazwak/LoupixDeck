@@ -25,5 +25,5 @@ public sealed class CommandContext
     public DeviceInfo? Device { get; init; }
 
     /// <summary>The host bridge of the owning plugin.</summary>
-    public required IPluginHost Host { get; init; }
+    public required IPluginHost? Host { get; init; }
 }

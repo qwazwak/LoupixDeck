@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Ports;
 using System.Security.Cryptography;
 using System.Text;
@@ -82,7 +83,8 @@ public class SerialConnection : ISerialConnection
     /// <summary>
     /// Indicates whether the serial port is open and ready for communication.
     /// </summary>
-    public bool IsReady => _serialPort is not null && _serialPort.IsOpen;
+    [MemberNotNullWhen(true, nameof(_serialPort))]
+    public bool IsReady => _serialPort?.IsOpen is true;
 
     /// <summary>
     /// Establishes the connection and performs the handshake.

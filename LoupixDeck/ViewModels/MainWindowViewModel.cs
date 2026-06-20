@@ -408,7 +408,7 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void QuitApplication()
+    private static void QuitApplication()
     {
         var window = Utils.WindowHelper.GetMainWindow();
         if (window is Views.MainWindow mw)

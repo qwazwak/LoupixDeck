@@ -25,7 +25,7 @@ public interface ISysCommandService
     /// <summary>
     /// Returns information about a command.
     /// </summary>
-    CommandInfo GetCommandInfo(string commandName);
+    CommandInfo? GetCommandInfo(string commandName);
 
     /// <summary>
     /// Returns information about all available commands.
@@ -43,19 +43,10 @@ public interface ISysCommandService
     bool TryGetCommandType(string commandName, [NotNullWhen(true), MaybeNullWhen(false)] out Type type);
 }
 
-public class SysCommandService : ISysCommandService
+public class SysCommandService(IServiceProvider serviceProvider, IUInputKeyboard uInputKeyboard) : ISysCommandService
 {
     private readonly Dictionary<string, (Type CommandType, CommandAttribute Attribute)> _commands
         = new Dictionary<string, (Type CommandType, CommandAttribute Attribute)>();
-
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IUInputKeyboard _uInputKeyboard;
-
-    public SysCommandService(IServiceProvider serviceProvider, IUInputKeyboard uInputKeyboard)
-    {
-        _serviceProvider = serviceProvider;
-        _uInputKeyboard = uInputKeyboard;
-    }
 
     /// <summary>
     /// Initializes the available commands by scanning the assembly.
@@ -87,7 +78,7 @@ public class SysCommandService : ISysCommandService
         if (_commands.TryGetValue(commandName, out var command))
         {
             var executableCommand =
-                (IExecutableCommand)ActivatorUtilities.CreateInstance(_serviceProvider, command.CommandType);
+                (IExecutableCommand)ActivatorUtilities.CreateInstance(serviceProvider, command.CommandType);
             await executableCommand.Execute(parameters);
         }
         else
@@ -113,7 +104,7 @@ public class SysCommandService : ISysCommandService
         return false;
     }
 
-    public CommandInfo GetCommandInfo(string commandName)
+    public CommandInfo? GetCommandInfo(string commandName)
     {
         if (_commands.TryGetValue(commandName, out var entry))
         {
@@ -182,7 +173,7 @@ public class SysCommandService : ISysCommandService
         return null;
     }
 
-    private List<ParameterDescriptor> CreateParameterDescriptors(CommandAttribute attribute)
+    private static List<ParameterDescriptor> CreateParameterDescriptors(CommandAttribute attribute)
     {
         var list = new List<ParameterDescriptor>();
 

@@ -27,7 +27,7 @@ public class PluginCommandProvider : ICommandProvider
             if (plugin.Status != PluginLoadStatus.Loaded)
                 continue;
 
-            foreach (var command in plugin.Commands)
+            foreach (IPluginCommand command in plugin.Commands)
             {
                 try
                 {
@@ -44,7 +44,7 @@ public class PluginCommandProvider : ICommandProvider
         return result;
     }
 
-    private static RegisteredCommand Adapt(IPluginCommand command, IPluginHost host)
+    private static RegisteredCommand Adapt(IPluginCommand command, PluginHost? host)
     {
         var descriptor = command.Descriptor;
 
@@ -59,7 +59,7 @@ public class PluginCommandProvider : ICommandProvider
                 .ToList()
         };
 
-        Func<string[], ButtonTargets, int?, Task> execute = async (parameters, target, sourceIndex) =>
+        async Task execute(string[] parameters, ButtonTargets target, int? sourceIndex)
         {
             try
             {
@@ -78,7 +78,7 @@ public class PluginCommandProvider : ICommandProvider
                 // button-press handler with no plugin attribution.
                 host?.Logger?.Error($"Execute failed for '{descriptor.CommandName}'", ex);
             }
-        };
+        }
 
         var isDisplay = false;
         var isImageDisplay = false;

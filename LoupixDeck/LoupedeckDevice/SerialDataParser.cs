@@ -17,7 +17,12 @@ public class SerialDataParser
     // debugging the framing, but it floods the console during normal operation
     // (and drowns out everything else). Off by default; flip to true here when
     // you need to inspect the raw protocol.
+#if DEBUG
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Roslynator", "RCS1187:Use constant instead of field", Justification = "Debugging")]
     private static readonly bool TraceEnabled = false;
+#else
+    private const bool TraceEnabled = false;
+#endif
 
     private static void Trace(string message)
     {

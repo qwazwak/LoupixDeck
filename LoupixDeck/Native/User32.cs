@@ -111,6 +111,7 @@ internal static partial class User32
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1069:Enums values should not be duplicated", Justification = "Matches Windows API")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Roslynator", "RCS1234:Duplicate enum value", Justification = "Matches Windows API")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Roslynator", "RCS1154:Sort enum members", Justification = "Matches Windows API")]
     public enum VIRTUAL_KEY : ushort
     {
         VK_0 = 48,

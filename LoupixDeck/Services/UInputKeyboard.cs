@@ -206,7 +206,7 @@ public sealed class UInputKeyboard : IUInputKeyboard
 
     public void Dispose() => uinputNative?.Dispose();
 
-    private string GetCurrentKeyboardLayout()
+    private static string GetCurrentKeyboardLayout()
     {
         try
         {

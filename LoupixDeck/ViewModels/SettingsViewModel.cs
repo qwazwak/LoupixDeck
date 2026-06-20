@@ -1,6 +1,5 @@
 #nullable enable
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -46,7 +45,7 @@ public partial class SettingsViewModel : DialogViewModelBase<DialogResult>
     /// </summary>
     [SupportedOSPlatformGuard("windows")]
     [SupportedOSPlatformGuard("linux")]
-    public bool IsAppSwitchingSupported => OperatingSystem.IsWindows() || OperatingSystem.IsLinux();
+    public static bool IsAppSwitchingSupported => OperatingSystem.IsWindows() || OperatingSystem.IsLinux();
 
     public bool IsWindows => OperatingSystem.IsWindows();
 
@@ -225,7 +224,7 @@ public partial class SettingsViewModel : DialogViewModelBase<DialogResult>
     /// Windows / xdg-open on Linux.
     /// </summary>
     [RelayCommand]
-    private void OpenPluginsFolder()
+    private static void OpenPluginsFolder()
     {
         try
         {
@@ -377,7 +376,7 @@ public partial class SettingsViewModel : DialogViewModelBase<DialogResult>
         AppBindingRows.Add(new AppBindingRow(binding, TouchPages, RotaryPageOptions));
     }
 
-    private bool CanRemoveAppBindings(AppBindingRow row) => row != null;
+    private static bool CanRemoveAppBindings(AppBindingRow row) => row != null;
 
     [RelayCommand(CanExecute = nameof(CanRemoveAppBindings))]
     private void RemoveAppBinding(AppBindingRow row)
@@ -559,7 +558,7 @@ public partial class SettingsViewModel : DialogViewModelBase<DialogResult>
     [ObservableProperty]
     public partial SettingsView CurrentView { get; set; }
 
-    private bool CanEditWallpaper(TouchButtonPage? p) => p != null;
+    private static bool CanEditWallpaper(TouchButtonPage? p) => p != null;
 
     [RelayCommand(CanExecute = nameof(CanEditWallpaper))]
     private async Task EditWallpaper(TouchButtonPage page)
@@ -569,7 +568,7 @@ public partial class SettingsViewModel : DialogViewModelBase<DialogResult>
             vm => vm.Initialize(page));
     }
 
-    private bool CanEditPageCommands(object? p) => p is TouchButtonPage or RotaryButtonPage;
+    private static bool CanEditPageCommands(object? p) => p is TouchButtonPage or RotaryButtonPage;
 
     [RelayCommand(CanExecute = nameof(CanEditPageCommands))]
     private async Task EditPageCommands(object page)
@@ -583,7 +582,7 @@ public partial class SettingsViewModel : DialogViewModelBase<DialogResult>
     private void Navigate(SettingsView settingsPage) => CurrentView = settingsPage;
 
     [RelayCommand]
-    private void OpenWebsite()
+    private static void OpenWebsite()
     {
         try
         {

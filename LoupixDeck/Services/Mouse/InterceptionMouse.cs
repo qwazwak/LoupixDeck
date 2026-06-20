@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using LoupixDeck.Models.Macros;
 using LoupixDeck.Native;
 using LoupixDeck.Native.Types.Windows;

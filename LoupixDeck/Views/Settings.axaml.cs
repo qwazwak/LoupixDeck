@@ -9,7 +9,6 @@ using LoupixDeck.Services.Plugins;
 using LoupixDeck.Utils;
 using LoupixDeck.ViewModels;
 using LoupixDeck.ViewModels.Base;
-using System.Diagnostics.CodeAnalysis;
 
 namespace LoupixDeck.Views;
 

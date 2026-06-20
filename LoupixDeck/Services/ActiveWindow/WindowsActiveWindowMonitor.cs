@@ -1,9 +1,7 @@
 #if WINDOWS
 using LoupixDeck.Native;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
 
 namespace LoupixDeck.Services.ActiveWindow;
 

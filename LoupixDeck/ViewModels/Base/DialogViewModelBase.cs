@@ -6,7 +6,7 @@ public abstract class DialogViewModelBase<TResult> : ViewModelBase, IDialogViewM
 {
     public TaskCompletionSource<DialogResult> DialogResult { get; } = new();
 
-    protected void Confirm(TResult result)
+    protected void Confirm(TResult _)
     {
         DialogResult.TrySetResult(new DialogResult(true));
     }
@@ -23,7 +23,7 @@ public abstract class DialogViewModelBase<TParam, TResult> : ViewModelBase, IDia
 
     public abstract void Initialize(TParam parameter);
 
-    protected void Confirm(TResult result)
+    protected void Confirm(TResult _)
     {
         DialogResult.TrySetResult(new DialogResult(true));
     }

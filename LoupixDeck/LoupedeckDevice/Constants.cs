@@ -1,5 +1,6 @@
 namespace LoupixDeck.LoupedeckDevice;
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Roslynator", "RCS1154:Sort enum members", Justification = "Matching reference data")]
 public static class Constants
 {
     public enum ButtonType

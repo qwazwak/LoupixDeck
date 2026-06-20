@@ -1,5 +1,4 @@
 using LoupixDeck.PluginSdk;
-using System.Diagnostics.CodeAnalysis;
 
 namespace LoupixDeck.Services.Plugins;
 

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using LoupixDeck.ViewModels.Base;
 
 namespace LoupixDeck.ViewModels;
@@ -15,16 +16,12 @@ namespace LoupixDeck.ViewModels;
 /// providers, so App constructs it and adds each device's VM.
 /// </para>
 /// </summary>
-public sealed class MainShellViewModel : ViewModelBase
+public sealed partial class MainShellViewModel : ViewModelBase
 {
     public ObservableCollection<MainWindowViewModel> Devices { get; } = [];
 
-    private MainWindowViewModel _selectedDevice;
-    public MainWindowViewModel SelectedDevice
-    {
-        get => _selectedDevice;
-        set => SetProperty(ref _selectedDevice, value);
-    }
+    [ObservableProperty]
+    public partial MainWindowViewModel? SelectedDevice { get; set; }
 
     /// <summary>Show the device tab strip only when more than one device is present,
     /// so the single-device window looks exactly as it did before phase 3.</summary>
@@ -34,7 +31,7 @@ public sealed class MainShellViewModel : ViewModelBase
     {
         if (device == null) return;
         Devices.Add(device);
-        _selectedDevice ??= device;
+        SelectedDevice ??= device;
         OnPropertyChanged(nameof(HasMultipleDevices));
     }
 
@@ -43,7 +40,7 @@ public sealed class MainShellViewModel : ViewModelBase
     public void Remove(MainWindowViewModel device)
     {
         if (device == null) return;
-        var wasSelected = ReferenceEquals(_selectedDevice, device);
+        var wasSelected = ReferenceEquals(SelectedDevice, device);
         Devices.Remove(device);
         if (wasSelected)
             SelectedDevice = Devices.FirstOrDefault();
