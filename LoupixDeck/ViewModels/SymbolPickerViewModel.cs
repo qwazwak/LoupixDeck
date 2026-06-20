@@ -94,7 +94,7 @@ public partial class SymbolPickerViewModel : DialogViewModelBase<SymbolPickerReq
         IEnumerable<SymbolDefinition> filtered = SymbolLibrary.All;
         if (SelectedCategory != AllCategories)
             filtered = filtered.Where(s => s.Category == SelectedCategory);
-        
+
         if (search.Length is not 0)
         {
             filtered = filtered.Where(s =>

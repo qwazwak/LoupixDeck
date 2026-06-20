@@ -30,7 +30,7 @@ public class DBusController : IDBusController
             "org.freedesktop.Notifications", "/org/freedesktop/Notifications");
 
         var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LoupixDeck.ico");
-        
+
         await notifications.NotifyAsync("LoupixDeck", 0, iconPath,
             title, body,
             [], new Dictionary<string, object>(), expireTimeout);

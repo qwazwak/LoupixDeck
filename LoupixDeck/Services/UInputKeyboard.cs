@@ -136,7 +136,7 @@ public sealed class UInputKeyboard : IUInputKeyboard
 
             uinputNative.PressKey(keyCode.keycode);
             uinputNative.ReleaseKey(keyCode.keycode);
-            
+
             if (keyCode.shift)
                 uinputNative.ReleaseKey(KEY_LEFTSHIFT);
 

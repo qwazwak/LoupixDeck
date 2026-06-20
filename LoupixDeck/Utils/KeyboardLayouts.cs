@@ -139,7 +139,7 @@ public static class KeyboardLayouts
 
         new('ß', (12, false)),
         new('?', (12, true)),
-        
+
         new('´', (13, false)),
         new('`', (13, true)),
 
