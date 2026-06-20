@@ -48,6 +48,8 @@ public partial class SettingsViewModel : DialogViewModelBase<DialogResult>
     [SupportedOSPlatformGuard("linux")]
     public bool IsAppSwitchingSupported => OperatingSystem.IsWindows() || OperatingSystem.IsLinux();
 
+    public bool IsWindows => OperatingSystem.IsWindows();
+
     public SettingsViewModel(LoupedeckConfig config,
         IDeviceService deviceService,
         IPageManager pageManager,
