@@ -1,3 +1,6 @@
+using System.Collections.Frozen;
+using System.Collections.Immutable;
+
 namespace LoupixDeck.Services.Commands;
 
 /// <summary>
@@ -7,33 +10,42 @@ namespace LoupixDeck.Services.Commands;
 /// </summary>
 public static class ParameterDefaults
 {
+    private static readonly FrozenDictionary<Type, object?> Lookup = FrozenDictionary.ToFrozenDictionary<Type, object?>([
+            new(typeof(string), "string"),
+            new(typeof(bool), false),
+            new(typeof(char), '\0'),
+            new(typeof(byte), (byte)0),
+            new(typeof(sbyte), (sbyte)0),
+            new(typeof(short), (short)0),
+            new(typeof(ushort), (ushort)0),
+            new(typeof(int), 0),
+            new(typeof(uint), 0U),
+            new(typeof(long), 0L),
+            new(typeof(ulong), 0UL),
+            new(typeof(float), 0f),
+            new(typeof(double), 0.0),
+            new(typeof(decimal), 0m),
+            new(typeof(DateTime), default(DateTime)),
+            new(typeof(Guid), Guid.Empty),
+        ]);
+
+    private static ImmutableDictionary<Type, object?> EnumLookup = ImmutableDictionary<Type, object?>.Empty;
+
     public static object? GetDefaultValue(Type type)
     {
         ArgumentNullException.ThrowIfNull(type);
-
-        if (type == typeof(string)) return "string";
-        if (type == typeof(bool)) return false;
-        if (type == typeof(char)) return '\0';
-        if (type == typeof(byte)) return (byte)0;
-        if (type == typeof(sbyte)) return (sbyte)0;
-        if (type == typeof(short)) return (short)0;
-        if (type == typeof(ushort)) return (ushort)0;
-        if (type == typeof(int)) return 0;
-        if (type == typeof(uint)) return 0U;
-        if (type == typeof(long)) return 0L;
-        if (type == typeof(ulong)) return 0UL;
-        if (type == typeof(float)) return 0f;
-        if (type == typeof(double)) return 0.0;
-        if (type == typeof(decimal)) return 0m;
-        if (type == typeof(DateTime)) return default(DateTime);
-        if (type == typeof(Guid)) return Guid.Empty;
+        if (Lookup.TryGetValue(type, out var value))
+            return value;
 
         if (type.IsEnum)
         {
-            var values = Enum.GetValues(type);
-            return values.Length > 0
-                ? values.GetValue(0)!
-                : Activator.CreateInstance(type)!;
+            return ImmutableInterlocked.GetOrAdd(ref EnumLookup, type, static type =>
+            {
+                var values = Enum.GetValues(type);
+                return values.Length > 0
+                    ? values.GetValue(0)!
+                    : Activator.CreateInstance(type)!;
+            });
         }
 
         if (Nullable.GetUnderlyingType(type) != null)
