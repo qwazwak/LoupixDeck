@@ -11,7 +11,8 @@
   <Folder Name="/tools/">
     <Project Path="tools/BodyTextureBaker/BodyTextureBaker.csproj" />
   </Folder>
-  <Project Path="LoupixDeck/LoupixDeck.csproj" />
-  <Project Path="LoupixDeck.PluginSdk/LoupixDeck.PluginSdk.csproj" />
   <Project Path="LoupixDeck.Native/LoupixDeck.Native.csproj" />
+  <Project Path="LoupixDeck.PluginSdk/LoupixDeck.PluginSdk.csproj" />
+  <Project Path="LoupixDeck/LoupixDeck.csproj" />
+  <Project Path="QPlug/QPlug.csproj" Id="fa3f9304-4b57-4e12-8a69-3e7e1b858763" />
 </Solution>
