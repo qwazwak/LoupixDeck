@@ -329,7 +329,7 @@ public class PluginManager : IPluginManager
             var assembly = context.LoadFromAssemblyPath(entryPath);
 
             var pluginType = assembly.GetTypes()
-                .FirstOrDefault(t => !t.IsAbstract && typeof(LoupixPlugin).IsAssignableFrom(t));
+                .FirstOrDefault(static t => !t.IsAbstract && typeof(LoupixPlugin).IsAssignableFrom(t));
 
             if (pluginType == null)
             {
@@ -503,15 +503,17 @@ public class PluginManager : IPluginManager
 
     public void ShutdownAll()
     {
-        foreach (var plugin in _plugins.Where(p => p.Status == PluginLoadStatus.Loaded))
+        foreach (var plugin in _plugins)
         {
+            if (!plugin.IsLoaded)
+                continue;
             try
             {
                 plugin.Instance?.Shutdown();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"PluginManager: '{plugin.Manifest?.Id}' Shutdown threw: {ex.Message}");
+                Console.WriteLine($"PluginManager: '{plugin.Manifest.Id}' Shutdown threw: {ex.Message}");
             }
 
             try
@@ -520,7 +522,7 @@ public class PluginManager : IPluginManager
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"PluginManager: '{plugin.Manifest?.Id}' Unload threw: {ex.Message}");
+                Console.WriteLine($"PluginManager: '{plugin.Manifest.Id}' Unload threw: {ex.Message}");
             }
         }
     }
@@ -569,8 +571,7 @@ public class PluginManager : IPluginManager
     private static bool DeviceEnables(IServiceProvider provider, string pluginId)
     {
         var enabled = provider?.GetService<Models.LoupedeckConfig>()?.EnabledPlugins;
-        return enabled != null
-               && enabled.Any(id => string.Equals(id, pluginId, StringComparison.OrdinalIgnoreCase));
+        return enabled?.Contains(pluginId, StringComparer.OrdinalIgnoreCase) == true;
     }
 
     private static bool PlatformMatches(string platform)
@@ -592,7 +593,7 @@ public class PluginManager : IPluginManager
 
     private static LoadedPlugin Fail(string dir, PluginManifest manifest, string reason)
     {
-        Console.WriteLine($"PluginManager: '{manifest?.Id ?? dir}' failed — {reason}");
+        Console.WriteLine($"PluginManager: '{manifest.Id ?? dir}' failed — {reason}");
         return new LoadedPlugin
         {
             Manifest = manifest,
@@ -604,7 +605,7 @@ public class PluginManager : IPluginManager
 
     private static LoadedPlugin Incompatible(string dir, PluginManifest manifest, string reason)
     {
-        Console.WriteLine($"PluginManager: '{manifest?.Id ?? dir}' incompatible — {reason}");
+        Console.WriteLine($"PluginManager: '{manifest.Id ?? dir}' incompatible — {reason}");
         return new LoadedPlugin
         {
             Manifest = manifest,

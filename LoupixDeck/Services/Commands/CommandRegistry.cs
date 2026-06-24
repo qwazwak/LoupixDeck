@@ -72,6 +72,6 @@ public class CommandRegistry(IEnumerable<ICommandProvider> providers) : ICommand
             return;
         }
 
-        await command.Execute(parameters ?? Array.Empty<string>(), target, sourceIndex);
+        await command.Execute(parameters, target, sourceIndex);
     }
 }

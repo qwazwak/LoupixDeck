@@ -26,7 +26,7 @@ dotnet_diagnostic.IDE0005.severity = suggestion # IDE0005: Using directive is un
 dotnet_style_prefer_collection_expression = false # IDE0305: Simplify collection initialization
 
 # Organize usings
-dotnet_sort_system_directives_first = true
+dotnet_sort_system_directives_first = false:warning
 
 # New line preferences
 dotnet_style_allow_multiple_blank_lines_experimental = false:suggestion
@@ -55,6 +55,7 @@ dotnet_diagnostic.IDE0270.severity = none # IDE0270: Use coalesce expression
 dotnet_style_prefer_conditional_expression_over_assignment = false:warning
 dotnet_diagnostic.IDE0047.severity = none # Remove unnecessary parentheses
 dotnet_diagnostic.IDE0042.severity = silent # IDE0042: Deconstruct variable declaration
+csharp_style_prefer_range_operator = true:silent
 
 # TODO: review the following rules:
 # Use explicit type (not var)

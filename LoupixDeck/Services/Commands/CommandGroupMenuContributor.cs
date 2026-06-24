@@ -18,7 +18,10 @@ public class CommandGroupMenuContributor(ICommandRegistry registry) : IMenuContr
     // Currently empty — all such integrations have moved into plugins.
     private static readonly FrozenSet<string> SpecializedGroups = FrozenSet.Create(StringComparer.Ordinal, []);
 
-    public Task<IReadOnlyList<MenuEntry>> Contribute(ButtonTargets target)
+    Task<IReadOnlyList<MenuEntry>> IMenuContributor.Contribute(ButtonTargets target) => Task.FromResult(Contribute(target));
+
+    [SuppressMessage("Roslynator", "RCS1112:Combine 'Enumerable.Where' method chain", Justification = "Cannot merge a non-static lambda with a static lambda")]
+    public IReadOnlyList<MenuEntry> Contribute(ButtonTargets target)
     {
         var result = new List<MenuEntry>();
 
@@ -40,6 +43,6 @@ public class CommandGroupMenuContributor(ICommandRegistry registry) : IMenuContr
                 result.Add(groupMenu);
         }
 
-        return Task.FromResult<IReadOnlyList<MenuEntry>>(result);
+        return result;
     }
 }

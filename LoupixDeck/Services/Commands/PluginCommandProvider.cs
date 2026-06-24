@@ -20,7 +20,7 @@ public class PluginCommandProvider(IPluginManager pluginManager) : ICommandProvi
 
         foreach (var plugin in pluginManager.Plugins)
         {
-            if (plugin.Status != PluginLoadStatus.Loaded)
+            if (!plugin.IsLoaded)
                 continue;
 
             foreach (var command in plugin.Commands)
@@ -32,7 +32,7 @@ public class PluginCommandProvider(IPluginManager pluginManager) : ICommandProvi
                 catch (Exception ex)
                 {
                     Console.WriteLine(
-                        $"PluginCommandProvider: '{plugin.Manifest?.Id}' command adapt failed: {ex.Message}");
+                        $"PluginCommandProvider: '{plugin.Manifest.Id}' command adapt failed: {ex.Message}");
                 }
             }
         }
@@ -40,25 +40,27 @@ public class PluginCommandProvider(IPluginManager pluginManager) : ICommandProvi
         return result;
     }
 
-    private static CommandContext CreateCommandContext(string[] parameters, ButtonTargets target, PluginHost? host, int? sourceIndex)
+    private static CommandContext CreateCommandContext(string[] parameters, ButtonTargets target, PluginHost host, int? sourceIndex)
     {
-        Debug.Assert(host is not null, "Why do we not have a host?");
         Debug.Assert(parameters is not null, "parameters should not be null; use Array.Empty<string>() instead");
+
+        Debug.Assert(host is not null, "Why do we not have a host?");
+        ArgumentNullException.ThrowIfNull(host);
         return new()
         {
             Parameters = parameters ?? Array.Empty<string>(),
             Target = target,
             SourceIndex = sourceIndex,
-            Device = host?.ActiveDevice,
+            Device = host.ActiveDevice,
             Host = host
         };
     }
 
-    private static CommandContext CreateDisplayContext(string[] parameters, PluginHost? host)
+    private static CommandContext CreateDisplayContext(string[] parameters, PluginHost host)
         => CreateCommandContext(parameters, ButtonTargets.None, host, null);
 
     // Minor private delegate wrapper to enforce/call out what is and is not captured into the closure.
-    private static CommandExecutionDelegate GetExecuteDelegate(IPluginCommand command, PluginHost? host, CommandDescriptor descriptor)
+    private static CommandExecutionDelegate GetExecuteDelegate(IPluginCommand command, PluginHost host, CommandDescriptor descriptor)
     {
         return async (parameters, target, sourceIndex) =>
         {
@@ -77,7 +79,7 @@ public class PluginCommandProvider(IPluginManager pluginManager) : ICommandProvi
         };
     }
 
-    private static RegisteredCommand Adapt(IPluginCommand command, PluginHost? host)
+    private static RegisteredCommand Adapt(IPluginCommand command, PluginHost host)
     {
         var descriptor = command.Descriptor;
 
