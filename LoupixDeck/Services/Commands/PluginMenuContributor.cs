@@ -89,7 +89,11 @@ public class PluginMenuContributor : IPluginMenuSource
             ? new Dictionary<string, string>(node.Parameters)
             : null;
 
-        var entry = new MenuEntry(node.Name, node.CommandName ?? string.Empty, null, parameters);
+        var entry = new MenuEntry(node.Name, node.CommandName ?? string.Empty)
+        {
+            ParentName = null,
+            Parameters = new(node.Parameters)
+        };
 
         if (node.Children != null)
         {
