@@ -1,39 +1,14 @@
-using System.Collections.Immutable;
+using System.Data;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using LoupixDeck.PluginSdk;
+using NAudio.CoreAudioApi;
+using NAudio.CoreAudioApi.Interfaces;
+using NAudio.Wave;
 
 namespace QPlug;
 
-public class QPlugin : LoupixPlugin
-{
-    private ImmutableArray<IPluginCommand> CommandsList = [];
-
-    public override PluginMetadata Metadata { get; } = new()
-    {
-        Id = "qplug-alpha",
-        Author = "Qwazwak",
-        Name = "QPlug",
-
-        Version = new Version(0, 1, 0),
-        SdkVersion = SdkInfo.Version,
-    };
-    public override void Initialize(IPluginHost host) => CommandsList = [
-        new TestCommand(host),
-    ];
-    public override void Shutdown()
-    {
-        foreach (var item in CommandsList)
-        {
-            if (item is IDisposable disposable)
-                disposable.Dispose();
-        }
-    }
-    public override IEnumerable<IPluginCommand> GetCommands() => CommandsList;
-}
-
-// rat ugly aweful plugin of mine
-public sealed partial class TestCommand(IPluginHost host) : IPluginCommand
+public sealed partial class AudioOutCycler(IPluginHost host) : IPluginCommand
 {
     private readonly IPluginHost host = host;
     private IPluginLogger log => host.Logger;
@@ -74,8 +49,57 @@ public sealed partial class TestCommand(IPluginHost host) : IPluginCommand
         return null;
     }
 
+    private void RTest(string targetName)
+    {
+        using var pEnum = new MMDeviceEnumerator();
+        using (var pDefDevice = pEnum.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia))
+        {
+
+
+            // Create a multimedia device enumerator.
+            //Determine if it is the default audio device
+            if (pDefDevice.Properties.TryGetValue(PropertyKeys.PKEY_Device_FriendlyName, out string currentActiveName))
+            {
+                if (targetName == currentActiveName)
+                {
+                    log.Info($"The default audio device is already set to {targetName}");
+                    return;
+                }
+            }
+        }
+        var pDevices = pEnum.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+        foreach (var pDevice in pDevices)
+        {
+
+            bool bFind = false;
+            string wstrID = pDevice.ID;
+            if (pDevice.Properties.TryGetValue(PropertyKeys.PKEY_Device_FriendlyName, out string deviceName))
+            {
+                if (targetName == deviceName)
+                {
+                    // Create a new audio PolicyConfigClient
+
+                    PolicyConfigClient client = new PolicyConfigClient();
+                    // Using PolicyConfigClient, set the given device as the default playback communication device
+                    client.SetDefaultEndpoint(DeviceCollection[i].ID, ERole.eCommunications);
+                    // Using PolicyConfigClient, set the given device as the default playback device
+                    client.SetDefaultEndpoint(DeviceCollection[i].ID, ERole.eMultimedia);
+                    break;
+                }
+            }
+        }
+    }
+
     public void Execute(CommandContext ctx, string processName)
     {
+        var enumerator = new MMDeviceEnumerator();
+        foreach (var endpoint in
+                 enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
+        {
+            endpoint.
+            Console.WriteLine(endpoint.FriendlyName);
+        }
+
         Process? process = TryFindProcess(processName);
         if (process == null)
         {
