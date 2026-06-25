@@ -1,51 +1,60 @@
-using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
+using System.Runtime.Serialization;
 using NAudio.CoreAudioApi;
-using static System.Windows.Forms.DataFormats;
-using static CoreAudioApi.Interfaces.PolicyConfigClient;
+using NAudio.Wave;
 
 namespace CoreAudioApi.Interfaces;
 
 internal sealed partial class PolicyConfigClient
 {
     [ComImport, Guid("870af99c-171d-4f9e-af0d-e63df40c2bc9")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>")]
     private class _PolicyConfigClient;
 
     private readonly _PolicyConfigClient client = new();
 
-    private IPolicyConfig? policyConfig => client as IPolicyConfig;
-    private IPolicyConfigVista? policyConfigVista => client as IPolicyConfigVista;
-    private IPolicyConfig10? policyConfig10 => client as IPolicyConfig10;
-
-    public WAVEFORMATEXTENSIBLE GetMixFormat(string pszDeviceName)
+    private static WaveFormatExtensible WrapWaveFormat<TState>(PolicyConfigClient self, TState state, Action<PolicyConfigClient, TState, IntPtr> func)
     {
-        WAVEFORMATEXTENSIBLE format;
-        if (client is IPolicyConfig policyConfig)
-            Marshal.ThrowExceptionForHR(policyConfig.GetMixFormat(pszDeviceName, out format));
-        else if (client is IPolicyConfigVista policyConfigVista)
-            Marshal.ThrowExceptionForHR(policyConfigVista.GetMixFormat(pszDeviceName, out format));
-        else if (client is IPolicyConfig10 policyConfig10)
-            Marshal.ThrowExceptionForHR(policyConfig10.GetMixFormat(pszDeviceName, out format));
-        else
-            throw ExNone();
-        return format;
-    }
 
-    public WAVEFORMATEXTENSIBLE GetDeviceFormat(string pszDeviceName, bool bDefault)
-    {
-        WAVEFORMATEXTENSIBLE format;
-        if (client is IPolicyConfig policyConfig)
-            Marshal.ThrowExceptionForHR(policyConfig.GetDeviceFormat(pszDeviceName, bDefault, out format));
-        else if (client is IPolicyConfigVista policyConfigVista)
-            Marshal.ThrowExceptionForHR(policyConfigVista.GetDeviceFormat(pszDeviceName, bDefault, out format));
-        else if (client is IPolicyConfig10 policyConfig10)
-            Marshal.ThrowExceptionForHR(policyConfig10.GetDeviceFormat(pszDeviceName, bDefault, out format));
-        else
-            throw ExNone();
-        return format;
+        IntPtr formatPtr = Marshal.AllocHGlobal(Marshal.SizeOf<WaveFormatExtensible>());
+        try
+        {
+            func.Invoke(self, state, formatPtr);
+            WaveFormat result = WaveFormat.MarshalFromPtr(formatPtr);
+            Debug.Assert(result is WaveFormatExtensible);
+            return (WaveFormatExtensible)result;
+        }
+        finally
+        {
+            Marshal.FreeHGlobal(formatPtr);
+        }
     }
+    public WaveFormatExtensible GetMixFormat(string pszDeviceName)
+        => WrapWaveFormat(this, pszDeviceName, static (self, pszDeviceName, formatPtr) =>
+        {
+            if (self.client is IPolicyConfig policyConfig)
+                Marshal.ThrowExceptionForHR(policyConfig.GetMixFormat(pszDeviceName, formatPtr));
+            else if (self.client is IPolicyConfigVista policyConfigVista)
+                Marshal.ThrowExceptionForHR(policyConfigVista.GetMixFormat(pszDeviceName, formatPtr));
+            else if (self.client is IPolicyConfig10 policyConfig10)
+                Marshal.ThrowExceptionForHR(policyConfig10.GetMixFormat(pszDeviceName, formatPtr));
+            else
+                throw ExNone();
+        });
+
+    public WaveFormatExtensible GetDeviceFormat(string pszDeviceName, bool bDefault)
+        => WrapWaveFormat(this, (pszDeviceName, bDefault), static (self, args, formatPtr) =>
+        {
+            if (self.client is IPolicyConfig policyConfig)
+                Marshal.ThrowExceptionForHR(policyConfig.GetDeviceFormat(args.pszDeviceName, args.bDefault, formatPtr));
+            else if (self.client is IPolicyConfigVista policyConfigVista)
+                Marshal.ThrowExceptionForHR(policyConfigVista.GetDeviceFormat(args.pszDeviceName, args.bDefault, formatPtr));
+            else if (self.client is IPolicyConfig10 policyConfig10)
+                Marshal.ThrowExceptionForHR(policyConfig10.GetDeviceFormat(args.pszDeviceName, args.bDefault, formatPtr));
+            else
+                throw ExNone();
+        });
 
     public void ResetDeviceFormat(string pszDeviceName)
     {
@@ -97,9 +106,9 @@ internal sealed partial class PolicyConfigClient
             throw ExNone();
     }
 
-    public DeviceShareMode GetShareMode(string pszDeviceName)
+    public AudioClientShareMode GetShareMode(string pszDeviceName)
     {
-        DeviceShareMode pMode;
+        AudioClientShareMode pMode;
         if (client is IPolicyConfig policyConfig)
             Marshal.ThrowExceptionForHR(policyConfig.GetShareMode(pszDeviceName, out pMode));
         else if (client is IPolicyConfigVista policyConfigVista)
@@ -111,7 +120,7 @@ internal sealed partial class PolicyConfigClient
         return pMode;
     }
 
-    public void SetShareMode(string pszDeviceName, DeviceShareMode mode)
+    public void SetShareMode(string pszDeviceName, AudioClientShareMode mode)
     {
         if (client is IPolicyConfig policyConfig)
             Marshal.ThrowExceptionForHR(policyConfig.SetShareMode(pszDeviceName, mode));
@@ -149,7 +158,11 @@ internal sealed partial class PolicyConfigClient
 
 #endif
 
-    public void SetDefaultEndpoint(string pszDeviceName, ERole role)
+    public void SetDefaultConsoleEndpoint(string pszDeviceName) => SetDefaultEndpoint(pszDeviceName, Role.Console);
+    public void SetDefaultMultimediaEndpoint(string pszDeviceName) => SetDefaultEndpoint(pszDeviceName, Role.Multimedia);
+    public void SetDefaultCommunicationsEndpoint(string pszDeviceName) => SetDefaultEndpoint(pszDeviceName, Role.Communications);
+
+    public void SetDefaultEndpoint(string pszDeviceName, Role role)
     {
         if (client is IPolicyConfig policyConfig)
             Marshal.ThrowExceptionForHR(policyConfig.SetDefaultEndpoint(pszDeviceName, role));

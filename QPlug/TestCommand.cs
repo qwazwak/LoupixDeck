@@ -1,36 +1,8 @@
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using LoupixDeck.PluginSdk;
 
 namespace QPlug;
-
-public class QPlugin : LoupixPlugin
-{
-    private ImmutableArray<IPluginCommand> CommandsList = [];
-
-    public override PluginMetadata Metadata { get; } = new()
-    {
-        Id = "qplug-alpha",
-        Author = "Qwazwak",
-        Name = "QPlug",
-
-        Version = new Version(0, 1, 0),
-        SdkVersion = SdkInfo.Version,
-    };
-    public override void Initialize(IPluginHost host) => CommandsList = [
-        new TestCommand(host),
-    ];
-    public override void Shutdown()
-    {
-        foreach (var item in CommandsList)
-        {
-            if (item is IDisposable disposable)
-                disposable.Dispose();
-        }
-    }
-    public override IEnumerable<IPluginCommand> GetCommands() => CommandsList;
-}
 
 // rat ugly aweful plugin of mine
 public sealed partial class TestCommand(IPluginHost host) : IPluginCommand

@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using NAudio.CoreAudioApi;
 
 namespace CoreAudioApi.Interfaces;
 internal partial class PolicyConfigClient
@@ -8,10 +9,10 @@ internal partial class PolicyConfigClient
     public interface IPolicyConfig
     {
         [PreserveSig]
-        int GetMixFormat(string pszDeviceName, out WAVEFORMATEXTENSIBLE ppFormat);
+        int GetMixFormat(string pszDeviceName, IntPtr ppFormat);
 
         [PreserveSig]
-        int GetDeviceFormat(string pszDeviceName, bool bDefault, out WAVEFORMATEXTENSIBLE ppFormat);
+        int GetDeviceFormat(string pszDeviceName, bool bDefault, IntPtr ppFormat);
 
         [PreserveSig]
         int ResetDeviceFormat(string pszDeviceName);
@@ -26,10 +27,10 @@ internal partial class PolicyConfigClient
         int SetProcessingPeriod(string pszDeviceName, IntPtr pmftPeriod);
 
         [PreserveSig]
-        int GetShareMode(string pszDeviceName, [Out] out DeviceShareMode pMode);
+        int GetShareMode(string pszDeviceName, [Out] out AudioClientShareMode pMode);
 
         [PreserveSig]
-        int SetShareMode(string pszDeviceName, [In] DeviceShareMode mode);
+        int SetShareMode(string pszDeviceName, [In] AudioClientShareMode mode);
 
         [PreserveSig]
         int GetPropertyValue(string pszDeviceName, bool bFxStore, IntPtr key, IntPtr pv);
@@ -38,7 +39,7 @@ internal partial class PolicyConfigClient
         int SetPropertyValue(string pszDeviceName, bool bFxStore, IntPtr key, IntPtr pv);
 
         [PreserveSig]
-        int SetDefaultEndpoint(string pszDeviceName, ERole role);
+        int SetDefaultEndpoint(string pszDeviceName, Role role);
 
         [PreserveSig]
         int SetEndpointVisibility(string pszDeviceName, bool bVisible);

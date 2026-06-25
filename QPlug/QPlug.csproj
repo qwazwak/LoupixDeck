@@ -13,4 +13,8 @@
     <PackageReference Include="NAudio" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="content\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
