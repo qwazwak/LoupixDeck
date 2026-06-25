@@ -5,12 +5,9 @@ using LoupixDeck.PluginSdk;
 namespace QPlug;
 
 // rat ugly aweful plugin of mine
-public sealed partial class TestCommand(IPluginHost host) : IPluginCommand
+public sealed partial class TestCommand(IPluginHost Host) : PluginCommandBase(Host)
 {
-    private readonly IPluginHost host = host;
-    private IPluginLogger log => host.Logger;
-
-    public CommandDescriptor Descriptor { get; } = new()
+    public override CommandDescriptor Descriptor { get; } = new()
     {
         CommandName = "test-command",
         DisplayName = "Bring program to front",
@@ -21,32 +18,29 @@ public sealed partial class TestCommand(IPluginHost host) : IPluginCommand
         ParameterTemplate = "({process-name})"
     };
 
-    public ButtonTargets SupportedTargets => ButtonTargets.TouchButton | ButtonTargets.SimpleButton;
+    public override ButtonTargets SupportedTargets => ButtonTargets.TouchButton | ButtonTargets.SimpleButton;
 
-    public Task Execute(CommandContext ctx)
+    public override Task Execute(CommandContext ctx)
     {
-        log.Info($"Called with args: {string.Join(", ", ctx.Parameters)}");
-        if (ctx.Parameters.Length is 0)
-            log.Warn($"No process name provided");
-        else
-            Execute(ctx, ctx.Parameters[0]);
+        if (CheckValidParameterCount(ctx))
+            Execute(ctx.Parameters[0]);
         return Task.CompletedTask;
     }
 
-    private Process? TryFindProcess(string processName)
+    private static Process? TryFindProcess(string processName)
     {
+        ArgumentException.ThrowIfNullOrEmpty(processName);
+
         foreach (Process process in Process.GetProcesses())
         {
             string name = process.ProcessName;
-            if (!string.Equals(name, processName, StringComparison.OrdinalIgnoreCase))
-                continue;
-            log.Info($"Found process {name} with ID {process.Id}");
-            return process;
+            if (string.Equals(name, processName, StringComparison.OrdinalIgnoreCase))
+                return process;
         }
         return null;
     }
 
-    public void Execute(CommandContext ctx, string processName)
+    private void Execute(string processName)
     {
         Process? process = TryFindProcess(processName);
         if (process == null)
@@ -54,17 +48,18 @@ public sealed partial class TestCommand(IPluginHost host) : IPluginCommand
             log.Warn($"No process found with name {processName}");
             return;
         }
+        log.Info($"Found process {processName} with ID {process.Id} (native {process.MainWindowHandle})");
         bool s = SetForegroundWindow(process.MainWindowHandle);
         if (!s)
         {
             int error = Marshal.GetLastWin32Error();
-            log.Error($"Failed to set foreground window for process {processName} (PID {process.Id}). Error code: {error}");
+            string message = Marshal.GetPInvokeErrorMessage(error);
+            log.Error($"Failed to set foreground window for process {processName} (PID {process.Id}). ({error}) {message}");
         }
         else
         {
             log.Info($"Successfully set foreground window for process {processName} (PID {process.Id}).");
         }
-        return;
     }
 
     [LibraryImport("user32.dll", SetLastError = true)]
