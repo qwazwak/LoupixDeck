@@ -6,9 +6,12 @@ namespace QPlug;
 public class QPluginImpl(IPluginHost host)
 {
     private readonly CompositeMenuContributor menuContributor = new([
+            new AudioOutControlMenuContributor(host)
         ]);
     private readonly ImmutableArray<IPluginCommand> CommandsList = [
         new TestCommand(host),
+        new AudioOutCycler(host),
+        new AudioOutSetter(host),
     ];
 
     public static PluginMetadata Metadata { get; } = new()

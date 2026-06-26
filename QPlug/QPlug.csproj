@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -14,11 +14,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NAudio" />
+    <PackageReference Include="NAudio" GeneratePathProperty="true" />
+    <PackageReference Include="NAudio.Wasapi" GeneratePathProperty="true" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="content\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <ContentWithTargetPath Include="content\*.*" TargetPath="%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
+    <ContentWithTargetPath Include="$(PkgNAudio)\lib\net6.0\NAudio.dll" TargetPath="%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
+    <ContentWithTargetPath Include="$(PkgNAudio_Wasapi)\lib\net9.0-*\NAudio.Wasapi.dll" TargetPath="%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
   </ItemGroup>
 
 </Project>

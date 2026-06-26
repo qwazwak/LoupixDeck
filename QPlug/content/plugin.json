@@ -1,0 +1,8 @@
+{
+  "id": "qplug-alpha",
+  "name": "QPlug",
+  "version": "1.0.0",
+  "sdkVersion": "1.12",
+  "entryAssembly": "QPlug.dll",
+  "platform": "Windows"
+}

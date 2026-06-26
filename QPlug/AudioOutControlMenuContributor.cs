@@ -10,10 +10,10 @@ public sealed class AudioOutControlMenuContributor(IPluginHost Host) : MenuContr
     {
         try
         {
-            if (!target.HasAnyButton())
+            //if (!target.HasAnyButton())
                 return ValueTask.FromResult(ImmutableList<MenuNode>.Empty);
 
-            return ValueTask.FromResult(GetMenuNodesSync());
+            //return ValueTask.FromResult(GetMenuNodesSync());
         }
         catch (Exception ex)
         {
@@ -28,7 +28,7 @@ public sealed class AudioOutControlMenuContributor(IPluginHost Host) : MenuContr
             Name = "Audio Output Control",
             CommandName = null,
             Children = ImmutableList.Create(
-                GetNodeFor_ToggleAB(),
+                //GetNodeFor_ToggleAB(),
                 GetNodeFor_SetOutput()
             ),
         };
@@ -36,16 +36,19 @@ public sealed class AudioOutControlMenuContributor(IPluginHost Host) : MenuContr
             outputControl
         ];
     }
+
+    /*
     private static MenuNode GetNodeFor_ToggleAB()
         => new()
         {
             Name = "Toggle Audio Output Default A/B",
             CommandName = "toggle-audio-output-default-a-b",
-            Parameters = ImmutableDictionary.CreateRangeWithOverwrite<string, string>([
+            Parameters = ImmutableDictionary.CreateRange<string, string>([
                 new("audio-output-a", "Speakers (Realtek(R) Audio)"),
                 new("audio-output-b", "Headphones (Realtek(R) Audio)")
             ]),
         };
+    */
 
     private MenuNode GetNodeFor_SetOutput()
     {
@@ -60,8 +63,8 @@ public sealed class AudioOutControlMenuContributor(IPluginHost Host) : MenuContr
                 MenuNode node = new()
                 {
                     Name = $"Set Audio Output to {device.FriendlyName}",
-                    CommandName = "set-audio-output",
-                    Parameters = ImmutableDictionary.CreateRangeWithOverwrite<string, string>([
+                    CommandName = $"set-audio-output-{device.ID}",
+                    Parameters = ImmutableDictionary.CreateRange<string, string>([
                             new("audio-output", device.ID)
                         ]),
                 };
