@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace QPlug;
 
-public sealed class SoundVolumeViewExe
+public static class SoundVolumeViewExe
 {
     private const string exe = "svcl.exe";
     private static string LocalExeDir => Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
@@ -27,5 +27,5 @@ public sealed class SoundVolumeViewExe
         => Execute([ "/SwitchDefault", defaultA, defaultB, "all" ]);
 
     public static void SetOutput(string name)
-        => Execute(["/SetDefault", name, "all" ]);
+        => Execute([ "/SetDefault", name, "all" ]);
 }
