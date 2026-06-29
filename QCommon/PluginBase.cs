@@ -19,7 +19,7 @@ public interface IPlugin<TSelf> : IPlugin
     static abstract TSelf Init(IPluginHost host);
 }
 
-public abstract class PluginBase : IPlugin, IMenuContributor
+public abstract class PluginBase : IPlugin
 {
     protected readonly IPluginHost host;
     protected readonly ServiceProvider sp;
@@ -32,7 +32,7 @@ public abstract class PluginBase : IPlugin, IMenuContributor
     {
         this.host = host;
         sp = CreateServiceProvider(host, ConfigureServices);
-        menuContributor = new(sp.GetServices<MenuContributorBase>().ToImmutableArray());
+        menuContributor = sp.GetRequiredService<CompositeMenuContributor>();
         CommandsList = sp.GetServices<PluginCommandBase>().ToImmutableArray();
     }
 
