@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using LoupixDeck.PluginSdk;
+using QPlug.Commands;
 
 namespace QPlug;
 

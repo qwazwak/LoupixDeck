@@ -1,7 +1,8 @@
 using System.Collections.Immutable;
 using LoupixDeck.PluginSdk;
+using Microsoft.Extensions.Logging;
 
-namespace QPlug;
+namespace QPlug.Commands;
 
 public abstract class MenuContributorBase(IPluginHost Host)
 {
@@ -12,11 +13,9 @@ public abstract class MenuContributorBase(IPluginHost Host)
     public abstract ValueTask<ImmutableList<MenuNode>> GetMenuNodes(ButtonTargets target);
 }
 
-public abstract class PluginCommandBase(IPluginHost Host) : IPluginCommand
+public abstract class PluginCommandBase(ILogger logger) : IPluginCommand
 {
-    protected readonly IPluginHost host = Host;
-    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "std field name")]
-    protected IPluginLogger log => host.Logger;
+    protected readonly ILogger log = logger;
 
     public abstract CommandDescriptor Descriptor { get; }
     public abstract ButtonTargets SupportedTargets { get; }
@@ -32,7 +31,8 @@ public abstract class PluginCommandBase(IPluginHost Host) : IPluginCommand
     {
         if (ctx.Parameters.Length < minimumParameterCount)
         {
-            log.Warn($"Insufficient parameters provided. Expected at least {MinimumParameterCount}, got {ctx.Parameters.Length}: {string.Join(", ", ctx.Parameters)}");
+            //log.LogWarning($"Insufficient parameters provided. Expected at least {MinimumParameterCount}, got {ctx.Parameters.Length}: {string.Join(", ", ctx.Parameters)}");
+            log.LogWarning("Insufficient parameters provided. Expected at least {MinimumParameterCount}, got {ActualCount}: {Parameters}", MinimumParameterCount, ctx.Parameters.Length, string.Join(", ", ctx.Parameters));
             return true;
         }
         return false;

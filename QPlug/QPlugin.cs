@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using LoupixDeck.PluginSdk;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using QPlug.Commands;
 
 namespace QPlug;
 

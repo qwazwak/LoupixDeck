@@ -1,17 +1,19 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using LoupixDeck.PluginSdk;
+using Microsoft.Extensions.Logging;
+using QPlug.Commands;
 
 namespace QPlug;
 
 // rat ugly aweful plugin of mine
-public sealed partial class TestCommand(IPluginHost Host) : PluginCommandBase(Host)
+public sealed partial class TestCommand(ILogger<TestCommand> logger) : PluginCommandBase(logger)
 {
     public override CommandDescriptor Descriptor { get; } = new()
     {
         CommandName = "test-command",
         DisplayName = "Bring program to front",
-        Group = "Test Commands",
+        Group = "Q Plug",
         Parameters = [
             new("process-name", typeof(string))
             ],
@@ -45,20 +47,23 @@ public sealed partial class TestCommand(IPluginHost Host) : PluginCommandBase(Ho
         Process? process = TryFindProcess(processName);
         if (process == null)
         {
-            log.Warn($"No process found with name {processName}");
+            log.LogWarning($"No process found with name {processName}");
             return;
         }
-        log.Info($"Found process {processName} with ID {process.Id} (native {process.MainWindowHandle})");
+
+        if (log.IsEnabled(LogLevel.Debug))
+            log.LogDebug("Found process {processName} with ID {processId} (native {MainWindowHandle})", processName, process.Id, process.MainWindowHandle);
+
         bool s = SetForegroundWindow(process.MainWindowHandle);
         if (!s)
         {
             int error = Marshal.GetLastWin32Error();
             string message = Marshal.GetPInvokeErrorMessage(error);
-            log.Error($"Failed to set foreground window for process {processName} (PID {process.Id}). ({error}) {message}");
+            log.LogError("Failed to set foreground window for process {processName} (PID {processId}). ({error}) {message}", processName, process.Id, error, message);
         }
         else
         {
-            log.Info($"Successfully set foreground window for process {processName} (PID {process.Id}).");
+            log.LogInformation("Successfully set foreground window for process {processName} (PID {processId}).", processName, process.Id);
         }
     }
 

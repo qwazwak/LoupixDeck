@@ -1,8 +1,4 @@
-using System.Diagnostics;
-using System.Windows.Forms;
 using LoupixDeck.PluginSdk;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace QPlug;
 
@@ -14,18 +10,19 @@ public sealed class QPluginHost : LoupixPlugin, IMenuContributor
     public override PluginMetadata Metadata => QPlugin.Metadata;
     public override void Initialize(IPluginHost host)
     {
-        SetAllLoggers(host.Logger);
+        //SetAllLoggers(host.Logger);
         impl = new(host);
     }
 
     public override void Shutdown()
     {
         Interlocked.Exchange(ref impl, null)?.Dispose();
-        ClearAllLoggers();
+        //ClearAllLoggers();
     }
 
     public override IEnumerable<IPluginCommand> GetCommands() => Impl.GetCommandsList();
     public Task<IReadOnlyList<MenuNode>> GetMenuNodes(ButtonTargets target) => Impl.GetMenuNodes(target);
+#if false
 
     private sealed class LoggerHandler(Func<IPluginLogger?, ILogger> loggerFactory, Action<ILogger> setLogger, Action clearLogger)
     {
@@ -57,4 +54,5 @@ public sealed class QPluginHost : LoupixPlugin, IMenuContributor
 internal interface ILoggerHolder
 {
     abstract static void SetLogger(ILogger? logger);
+#endif
 }
