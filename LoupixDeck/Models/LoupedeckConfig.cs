@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Newtonsoft.Json;
 
@@ -19,6 +20,23 @@ namespace LoupixDeck.Models;
 /// </remarks>
 public partial class LoupedeckConfig : ObservableObject
 {
+    public LoupedeckConfig()
+    {
+        // A note on initializing from the constructor vs property setters:
+        // *Usually* setters are called to, you know, set the property (whether by us or a deserializer)
+        // But in fact an inline `... { get; set; } = new();` goes straight to the field
+        // bypassing any extra event-wiring - thus, this constructor enforces the execution of MvvmToolkit's
+        // generated setters (and calling of our handlers)
+        RotaryButtonPages = new();
+        LeftRotaryButtonPages = new();
+        RightRotaryButtonPages = new();
+        TouchButtonPages = new();
+
+        // AppPageBindings and HapticSteps don't need
+        // to be assigned here, because (as of writing) there is no
+        // additional wiring that needs to be done upon assignment
+    }
+
     /// <summary>
     /// Schema version of the persisted config. <see cref="ConfigService"/> runs
     /// the migration chain for older versions (see <c>Services/Migrations</c>).
@@ -120,7 +138,7 @@ public partial class LoupedeckConfig : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RotaryPageLabel))]
-    public partial ObservableCollection<RotaryButtonPage> RotaryButtonPages { get; set; } = [];
+    public partial ObservableCollection<RotaryButtonPage> RotaryButtonPages { get; set; }
 
     partial void OnRotaryButtonPagesChanging(ObservableCollection<RotaryButtonPage> value) => RotaryButtonPages?.CollectionChanged -= OnRotaryPagesChanged;
     partial void OnRotaryButtonPagesChanged(ObservableCollection<RotaryButtonPage> value) => RotaryButtonPages?.CollectionChanged += OnRotaryPagesChanged;
