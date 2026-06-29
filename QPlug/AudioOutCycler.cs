@@ -8,7 +8,7 @@ public sealed class AudioOutCycler(IPluginHost Host) : PluginCommandBase(Host)
     {
         CommandName = "toggle-audio-output-default-a-b",
         DisplayName = "Toggle Audio Output Default A/B",
-        Group = "Test Commands",
+        Group = "Q Plug",
         Parameters = [
             new("audio-output-a", typeof(string)),
             new("audio-output-b", typeof(string)),
@@ -25,6 +25,7 @@ public sealed class AudioOutCycler(IPluginHost Host) : PluginCommandBase(Host)
             log.Warn($"Insufficient parameters provided. Expected 2, got {ctx.Parameters.Length}: {string.Join(", ", ctx.Parameters)}");
             return Task.CompletedTask;
         }
+
         string audioOutputA = ctx.Parameters[0];
         string audioOutputB = ctx.Parameters[1];
         try

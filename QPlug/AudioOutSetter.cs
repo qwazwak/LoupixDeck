@@ -8,7 +8,7 @@ public sealed class AudioOutSetter(IPluginHost Host) : PluginCommandBase(Host)
     {
         CommandName = "set-audio-output",
         DisplayName = "Set Audio Output To...",
-        Group = "Test Commands",
+        Group = "Q Plug",
         Parameters = [
             new("audio-output", typeof(string)),
             ],

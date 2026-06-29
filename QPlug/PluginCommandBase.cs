@@ -24,10 +24,13 @@ public abstract class PluginCommandBase(IPluginHost Host) : IPluginCommand
 
     public abstract Task Execute(CommandContext ctx);
 
-    protected bool CheckValidParameterCount(CommandContext ctx) => !CheckInvalidParameterCount(ctx);
-    protected bool CheckInvalidParameterCount(CommandContext ctx)
+    protected bool CheckValidParameterCount(CommandContext ctx) => !CheckInvalidParameterCount(ctx, MinimumParameterCount);
+    protected bool CheckInvalidParameterCount(CommandContext ctx) => CheckInvalidParameterCount(ctx, MinimumParameterCount);
+
+    protected bool CheckValidParameterCount(CommandContext ctx, int minimumParameterCount) => !CheckInvalidParameterCount(ctx, minimumParameterCount);
+    protected bool CheckInvalidParameterCount(CommandContext ctx, int minimumParameterCount)
     {
-        if (ctx.Parameters.Length < MinimumParameterCount)
+        if (ctx.Parameters.Length < minimumParameterCount)
         {
             log.Warn($"Insufficient parameters provided. Expected at least {MinimumParameterCount}, got {ctx.Parameters.Length}: {string.Join(", ", ctx.Parameters)}");
             return true;

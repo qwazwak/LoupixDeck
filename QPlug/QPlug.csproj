@@ -14,14 +14,34 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Ben.Demystifier" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="NAudio" GeneratePathProperty="true" />
     <PackageReference Include="NAudio.Wasapi" GeneratePathProperty="true" />
   </ItemGroup>
 
   <ItemGroup>
-    <ContentWithTargetPath Include="content\*.*" TargetPath="%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
-    <ContentWithTargetPath Include="$(PkgNAudio)\lib\net6.0\NAudio.dll" TargetPath="%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
-    <ContentWithTargetPath Include="$(PkgNAudio_Wasapi)\lib\net9.0-*\NAudio.Wasapi.dll" TargetPath="%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
+    <ContentToCopy Include="$(OutputPath)\QPlug.pdb" />
+    <ContentToCopy Include="$(OutputPath)\QPlug.dll" />
+    <ContentToCopy Include="$(OutputPath)\QPlug.deps.json" />
+    <ContentToCopyExtra Include="content\*.*" />
+    <ContentToCopyExtra Include="$(PkgNAudio)\lib\net6.0\NAudio.dll" />
+    <ContentToCopyExtra Include="$(PkgNAudio_Wasapi)\lib\net9.0-*\NAudio.Wasapi.dll" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ContentToCopy Include="@(ContentToCopyExtra)" />
+    <ContentWithTargetPath Include="@(ContentToCopyExtra)" TargetPath="%(Filename)%(Extension)" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
+  <Target Name="InstallFiles" AfterTargets="Build;Rebuild" BeforeTargets="Run">
+    <ItemGroup>
+      <MySourceFiles Include="@(ContentToCopy)" />
+    </ItemGroup>
+    <PropertyGroup>
+      <TargetFolder>$(UserProfile)\.config\LoupixDeck\debug\plugins\qplug-alpha\</TargetFolder>
+    </PropertyGroup>
+    <Copy SourceFiles="@(MySourceFiles)" DestinationFolder="$(TargetFolder)" />
+  </Target>
 </Project>
