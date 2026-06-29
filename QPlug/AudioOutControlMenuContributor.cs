@@ -29,7 +29,7 @@ public sealed class AudioOutControlMenuContributor(IPluginHost Host) : MenuContr
             Name = "Audio Output Control",
             CommandName = null,
             Children = ImmutableList.Create(
-                //GetNodeFor_ToggleAB(),
+                GetNodeFor_ToggleAB(),
                 GetNodeFor_SetOutput()
             ),
         };
@@ -38,18 +38,12 @@ public sealed class AudioOutControlMenuContributor(IPluginHost Host) : MenuContr
         ];
     }
 
-    /*
     private static MenuNode GetNodeFor_ToggleAB()
         => new()
         {
             Name = "Toggle Audio Output Default A/B",
-            CommandName = "toggle-audio-output-default-a-b",
-            Parameters = ImmutableDictionary.CreateRange<string, string>([
-                new("audio-output-a", "Speakers (Realtek(R) Audio)"),
-                new("audio-output-b", "Headphones (Realtek(R) Audio)")
-            ]),
+            CommandName = "toggle-audio-output-default-settings-defined",
         };
-    */
 
     private MenuNode GetNodeFor_SetOutput()
     {
