@@ -18,11 +18,8 @@ public abstract class VolumeAdjustCommandBase(ILogger logger) : AudioCommandBase
         else
             volumeEndpoint.VolumeStepDown();
         float newLevel = volumeEndpoint.MasterVolumeLevel;
-        bool atLimit;
-        if (StepUp)
-            atLimit = volumeEndpoint.VolumeRange.MaxDecibels == newLevel;
-        else
-            atLimit = volumeEndpoint.VolumeRange.MinDecibels == newLevel;
+        float limitValue = StepUp ? volumeEndpoint.VolumeRange.MaxDecibels : volumeEndpoint.VolumeRange.MinDecibels;
+        bool atLimit = limitValue == newLevel;
 
         log.LogInformation("Volume stepped {name} ({role}) to {newLevel:F1} (changed by {diff:F1})", device.FriendlyName, role, newLevel, newLevel - oldLevel);
 

@@ -1,4 +1,4 @@
-namespace QPlug;
+namespace QCommon.Utils;
 
 internal sealed class NullDisposable : IDisposable
 {

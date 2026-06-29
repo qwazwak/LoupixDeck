@@ -1,15 +1,15 @@
 using Microsoft.Extensions.Logging;
 
-namespace QPlug;
+namespace QCommon.Utils.Extensions.Logging;
 
 public static class LoggerExtensions
 {
     private static bool IsEnabled([NotNullWhen(true)] ILogger? log, LogLevel logLevel) => log?.IsEnabled(logLevel) is true;
-    extension ([NotNullWhen(true)] ILogger? log)
+    extension([NotNullWhen(true)] ILogger? log)
     {
         public bool TraceEnabled => IsEnabled(log, LogLevel.Trace);
 
-        public bool DebugEnabled => IsEnabled(log, LogLevel.Debug); 
+        public bool DebugEnabled => IsEnabled(log, LogLevel.Debug);
 
         public bool InformationEnabled => IsEnabled(log, LogLevel.Information);
 

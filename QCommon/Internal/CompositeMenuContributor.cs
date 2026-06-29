@@ -1,11 +1,13 @@
 using System.Collections.Immutable;
 using LoupixDeck.PluginSdk;
-using QPlug.Commands;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace QPlug;
+namespace QCommon.Internal;
 
-public sealed class CompositeMenuContributor(ImmutableArray<MenuContributorBase> contributors) : IMenuContributor
+internal sealed class CompositeMenuContributor(ImmutableArray<MenuContributorBase> contributors) : IMenuContributor
 {
+    [ActivatorUtilitiesConstructor]
+    public CompositeMenuContributor(IEnumerable<MenuContributorBase> contributors) : this(contributors.ToImmutableArray()) { }
     public Task<IReadOnlyList<MenuNode>> GetMenuNodes(ButtonTargets target)
     {
         ImmutableList<MenuNode>.Builder nodesBuilder = ImmutableList.CreateBuilder<MenuNode>();

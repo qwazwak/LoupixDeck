@@ -1,16 +1,15 @@
-using LoupixDeck.PluginSdk;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NAudio.CoreAudioApi;
 using NAudio.CoreAudioApi.Interfaces;
+using QCommon.Utils.Extensions.Logging;
 
 namespace QPlug;
 
-internal sealed class DefaultDeviceReferencer(IPluginHost Host, [ServiceKey] Role role) : IDisposable, IMMNotificationClient
+internal sealed class DefaultDeviceReferencer(ILogger<DefaultDeviceReferencer> log, [ServiceKey] Role role) : IDisposable, IMMNotificationClient
 {
     private const DataFlow dataFlow = DataFlow.Render;
     private readonly Lock @lock = new();
-    private readonly ILogger log = Loggers.CreateLogger<DefaultDeviceReferencer>(Host.Logger, role.ToString());
     private readonly Role role = role;
     private MMDevice? currentDefaultDevice;
     private bool isDisposed;
@@ -20,6 +19,7 @@ internal sealed class DefaultDeviceReferencer(IPluginHost Host, [ServiceKey] Rol
 
     private void VolumeStep(Action<AudioEndpointVolume> doStep, string name)
     {
+        using IDisposable? _ = log.BeginScopeTags([new(nameof(Role), role)]);
         float oldLevel;
         float newLevel;
         using (Lock.Scope scope = @lock.EnterScope())
@@ -38,6 +38,7 @@ internal sealed class DefaultDeviceReferencer(IPluginHost Host, [ServiceKey] Rol
 
     public void ToggleMute()
     {
+        using IDisposable? _ = log.BeginScopeTags([new(nameof(Role), role)]);
         using Lock.Scope scope = @lock.EnterScope();
         AudioEndpointVolume? volumeControl = currentDefaultDevice?.AudioEndpointVolume;
         if (volumeControl is null)
@@ -100,4 +101,16 @@ internal sealed class DefaultDeviceReferencer(IPluginHost Host, [ServiceKey] Rol
         isDisposed = true;
         ReplaceDevice(null);
     }
+}
+
+public readonly struct VolumeRange(float minDecibels, float maxDecibels, float incrementDecibels)
+{
+    public readonly float MinDecibels = minDecibels;
+    public readonly float MaxDecibels = maxDecibels;
+    public readonly float IncrementDecibels = incrementDecibels;
+
+    public float Clamp(float currentValue, float adjustment) => Clamp(currentValue + adjustment);
+    public float Clamp(float newValue) => Math.Clamp(newValue, MinDecibels, MaxDecibels);
+
+    public static implicit operator VolumeRange(AudioEndpointVolumeVolumeRange range) => new(range.MinDecibels, range.MaxDecibels, range.IncrementDecibels);
 }

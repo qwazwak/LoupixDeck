@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using LoupixDeck.PluginSdk;
 using NAudio.CoreAudioApi;
-using QPlug.Commands;
+using QCommon;
 
 namespace QPlug;
 
