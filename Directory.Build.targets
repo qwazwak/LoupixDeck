@@ -4,4 +4,15 @@
     <DebugSymbols>true</DebugSymbols>
     <Optimize>false</Optimize>
   </PropertyGroup>
+
+  <Target Name="SuperClean" AfterTargets="Clean" BeforeTargets="AfterClean">
+    <ItemGroup Condition="'$(ProjectDir)' != ''">
+      <ToRemove Include="$(ProjectDir)\obj\**\*" />
+      <ToRemove Include="$(ProjectDir)\bin\**\*" />
+    </ItemGroup>
+    <PropertyGroup>
+      <TargetFolder>$(UserProfile)\.config\LoupixDeck\debug\plugins\qplug-alpha\</TargetFolder>
+    </PropertyGroup>
+    <Delete Files="@(ToRemove)" />
+  </Target>
 </Project>

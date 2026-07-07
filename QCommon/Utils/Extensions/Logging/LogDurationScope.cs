@@ -10,6 +10,20 @@ public readonly struct LogDurationScope(ILogger log, long startedAt, string name
     private readonly string name = name;
     private readonly EventId eventId = eventId;
     private readonly LogLevel logLevel = logLevel;
+#if TODO
+    private Exception? ex;
+    private LogLevel exceptionLogLevel;
+
+    public void AttachException(Exception ex, LogLevel logLevel = LogLevel.Error)
+    {
+        if(this.ex is not null)
+        {
+            log.LogError("An exception was already attached to this LogDurationScope, overwriting it with the new exception. Previous exception: {previousException}", this.ex);
+        }
+        this.ex = ex;
+        this.exceptionLogLevel = logLevel;
+    }
+#endif
 
     public readonly void Dispose()
     {
