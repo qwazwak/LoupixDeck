@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,23 +10,22 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LoupixDeck.PluginSdk\LoupixDeck.PluginSdk.csproj" />
-    <ProjectReference Include="..\QCommon\QCommon.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Ben.Demystifier" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-    <PackageReference Include="NAudio" GeneratePathProperty="true" />
-    <PackageReference Include="NAudio.Wasapi" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
   </ItemGroup>
 
+  <!--
   <ItemGroup>
     <ContentToCopy Include="$(OutputPath)\QPlug.pdb" />
     <ContentToCopy Include="$(OutputPath)\QPlug.dll" />
     <ContentToCopy Include="$(OutputPath)\QPlug.deps.json" />
     <ContentToCopyExtra Include="content\*.*" />
     <ContentToCopyExtra Include="$(PkgNAudio)\lib\net6.0\NAudio.dll" />
-    <ContentToCopyExtra Include="$(PkgNAudio_Wasapi)\lib\net9.0-*\NAudio.Wasapi.dll" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,4 +42,5 @@
     </PropertyGroup>
     <Copy SourceFiles="@(MySourceFiles)" DestinationFolder="$(TargetFolder)" />
   </Target>
+  -->
 </Project>

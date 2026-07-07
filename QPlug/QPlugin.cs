@@ -1,25 +1,15 @@
-using System.Collections.Immutable;
 using LoupixDeck.PluginSdk;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using NAudio.CoreAudioApi;
+using QCommon;
 using QPlug.Commands;
 
 namespace QPlug;
+public sealed class QPluginHost : PluginHost<QPlugin>; //IPluginSettingsPage
 
-public sealed partial class QPlugin
+public sealed class QPlugin(IPluginHost host) : PluginBase(host), IPlugin<QPlugin>
 {
-    private readonly IPluginHost host;
-    private readonly ServiceProvider sp;
-    private readonly CompositeMenuContributor menuContributor;
-    private readonly ImmutableArray<PluginCommandBase> CommandsList;
-
-    public QPlugin(IPluginHost host)
-    {
-        this.host = host;
-        sp = CreateServiceCollection(host).BuildServiceProvider(new ServiceProviderOptions() { ValidateOnBuild = true, ValidateScopes = true });
-        menuContributor = new(sp.GetServices<MenuContributorBase>().ToImmutableArray());
-        CommandsList = sp.GetServices<PluginCommandBase>().ToImmutableArray();
-    }
+    static QPlugin IPlugin<QPlugin>.Init(IPluginHost host) => new(host);
 
     public static PluginMetadata Metadata { get; } = new()
     {
@@ -31,10 +21,23 @@ public sealed partial class QPlugin
         SdkVersion = SdkInfo.Version,
     };
 
-    public Task<IReadOnlyList<MenuNode>> GetMenuNodes(ButtonTargets target) => menuContributor.GetMenuNodes(target);
-    public ImmutableArray<IPluginCommand> GetCommandsList() => ImmutableArray<IPluginCommand>.CastUp(CommandsList);
-    public void Dispose()
+    protected override void ConfigureServices(ServiceCollection services)
     {
-        sp.Dispose();
+        services.AddMenuContributor<AudioOutControlMenuContributor>();
+
+        services.AddCommand<TestCommand>()
+            .AddCommand<AudioOutCycler>()
+            .AddCommand<AudioOutSetter>()
+            .AddCommand<MuteToggleCommand>()
+            .AddCommand<VolumeAdjustUpCommand>()
+            .AddCommand<VolumeAdjustDownCommand>()
+            ;
+
+        services.AddScoped<SoundVolumeViewExe>();
+
+        services.AddKeyedSingleton<DefaultDeviceReferencer>(Role.Console);
+        services.AddKeyedSingleton<DefaultDeviceReferencer>(Role.Multimedia);
+        services.AddKeyedSingleton<DefaultDeviceReferencer>(Role.Communications);
+        services.AddSingleton<MetaDefaultDeviceReferencer>();
     }
 }

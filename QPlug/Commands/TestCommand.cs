@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using LoupixDeck.PluginSdk;
 using Microsoft.Extensions.Logging;
-using QPlug.Commands;
+using QCommon;
 
 namespace QPlug;
 
@@ -47,7 +47,7 @@ public sealed partial class TestCommand(ILogger<TestCommand> logger) : PluginCom
         Process? process = TryFindProcess(processName);
         if (process == null)
         {
-            log.LogWarning($"No process found with name {processName}");
+            log.LogWarning("No process found with name {processName}", processName);
             return;
         }
 

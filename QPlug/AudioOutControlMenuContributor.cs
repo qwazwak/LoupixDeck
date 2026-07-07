@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using LoupixDeck.PluginSdk;
 using NAudio.CoreAudioApi;
-using QPlug.Commands;
+using QCommon;
 
 namespace QPlug;
 
@@ -43,11 +43,7 @@ public sealed class AudioOutControlMenuContributor(IPluginHost Host) : MenuContr
         => new()
         {
             Name = "Toggle Audio Output Default A/B",
-            CommandName = "toggle-audio-output-default-a-b",
-            Parameters = ImmutableDictionary.CreateRange<string, string>([
-                new("audio-output-a", "Speakers (Realtek(R) Audio)"),
-                new("audio-output-b", "Headphones (Realtek(R) Audio)")
-            ]),
+            CommandName = "toggle-audio-output-default-settings-defined",
         };
     */
 

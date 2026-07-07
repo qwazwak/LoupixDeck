@@ -1,6 +1,8 @@
 using LoupixDeck.PluginSdk;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using QCommon;
+using QCommon.Utils.Extensions.Logging;
 
 namespace QPlug.Commands;
 

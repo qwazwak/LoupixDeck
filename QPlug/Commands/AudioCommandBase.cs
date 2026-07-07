@@ -1,6 +1,7 @@
 using LoupixDeck.PluginSdk;
 using Microsoft.Extensions.Logging;
 using NAudio.CoreAudioApi;
+using QCommon;
 
 namespace QPlug.Commands;
 
